@@ -1,0 +1,57 @@
+{% extends "carden.html" %}
+{% load bootstrap5 %}
+
+{% block conteudo %}
+<p1>*Olá {{usuario}} esta acessando a unidade de {{unidade}}<br><br></p1>
+<div class="col-md-12">  
+          <div class="list-group">
+                <h1>Débito Geral</h1>
+                  <div class="container mt-5">
+                      <table class="table text-light">
+                        <thead>
+                          <tr>
+                            <th scope="col">Aluno</th>
+                            <th scope="col">Produto</th>  
+                            <th scope="col">Valor unitário</th>
+                            <th scope="col">Quantidade</th>                        
+                            <th scope="col">Valor total</th>                            
+                            <th scope="col">Data</th>              
+                          </tr>
+                        </thead>
+                        
+                        <tbody>
+                          {% for debito in lista_debito%}
+                          <tr>
+                  
+                            <th scope="row">{{ debito.aluno }}</th>                            
+                            <td> {{ debito.produto }}</td>
+                            <td> {{ debito.valor_unitario}}</td>
+                            <td> {{ debito.quantidade}}</td>
+                            <td> {{ debito.valor_total}}</td>
+                            <td> {{ debito.data|date:"d-m-Y"}}</td>
+                          </tr>   
+                        </tbody>             
+                        {% endfor %}
+        
+                      </table>
+                  </div>
+          </div>
+</div>
+        <div class="container" style="display: flex; font-size: 18px;margin-right: 20px; font-weight: bold;" >
+          <p class="paragrafo"  style="margin-left: 300px;">Valor total: {{total_debito}}</p>
+          <p class="outro-texto"  style="margin-left: 40px;" >Quantidade de débito: {{quant_debito}}</p>
+          
+
+               
+        </div>
+        <!-- <p style="font-size: 18px;">Debito total: {{total_debito}}</p> -->
+    
+      
+        
+
+<div class="col-md-12">
+  <a href="{% url 'cadastro:cadast-debito'%}" class="btn btn-primary" role="button" style="width: 200px">Cadastrar debito</a>
+  <a href="{% url 'cadastro:pesquisa-debito-aluno'%}" class="btn btn-primary" role="button" style="width: 200px">Débito por aluno</a>
+  <a href="{% url 'cadastro:pesquisa'%}" class="btn btn-primary"  role="button" style="width: 200px">Home</a>
+</div>  
+{% endblock %}
