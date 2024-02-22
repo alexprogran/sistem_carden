@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "upadate",
     "deleta",
 
+    
+
 ]
 
 MIDDLEWARE = [
