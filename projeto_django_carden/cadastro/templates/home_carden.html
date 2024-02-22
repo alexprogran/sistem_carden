@@ -1,0 +1,16 @@
+{% extends "carden.html" %}
+{% load bootstrap5 %}
+
+{% block conteudo %}
+<p>Óla {{usuario}}</p>
+<h1>Unidade {{unidade}}<br><br>
+<div class="col-md-12"> 
+
+    <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary" role="button" style="width: 300px">Cadastramentos</a>
+    <a href="{% url 'cadastro:pesquisa'%}" class="btn btn-primary" role="button" style="width: 300px">Pesquisas</a>
+    <a href="{% url 'cadastro:unidade'%}" class="btn btn-primary" role="button" style="width: 300px">Unidades</a>
+    <a href="{% url 'cadastro:login'%}" class="btn btn-primary" role="button" style="width: 300px">Login</a>
+
+</div><br><br>
+
+{% endblock %}

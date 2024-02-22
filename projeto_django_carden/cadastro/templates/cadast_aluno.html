@@ -1,0 +1,41 @@
+{% extends "carden.html" %}
+{% load bootstrap5 %}
+
+{% block conteudo %}
+<div class="col-md-6">
+    <!-- Cadastro relalizado com sucesso  -->
+    {% if sucesso %}
+        <p class="alert alert-success"> Cadastro de {{aluno|upper}} realizado com sucesso</p>
+        <a href="{% url 'cadastro:cadast-aluno'%}" class="btn btn-primary">Realisar um novo cadastro</a>  
+        <a href="{% url 'cadastro:pesquisa-aluno'%}" class="btn btn-primary">Alunos</a>
+
+
+    <!-- Caso o aluno informado não exista no banco de dados -->
+    {% elif not_exist %}
+    <div class="col-md-12">
+    <p class="alert alert-danger">Nome inválido, {{nome_form|upper}} já é um nome cadastrado</p>
+    <a href="{% url 'cadastro:pesquisa-aluno'%}" class="btn btn-primary">Cancelar</a>
+    <a href="{% url 'cadastro:cadast-aluno'%}" class="btn btn-primary">Tentar Novamente</a>
+    </div>
+
+    {% else %}
+    <!-- Usuário logado -->
+    <p >Olá: {{user}}</p>
+    
+    <h1>Unidade de cadastro - {{unidade}}<br><br></h1>
+    <form action="" method="post" >                   
+        {% csrf_token %}
+        {% bootstrap_form aluno_form%}
+        
+        
+
+        <button class="btn btn-primary" type="submit">Enviar</button>
+        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a> 
+        <a href="{% url 'cadastro:pesquisa-aluno'%}" class="btn btn-primary">Alunos</a>  
+    </form>
+    </form>
+
+    {% endif %}
+
+</div>
+{% endblock %}

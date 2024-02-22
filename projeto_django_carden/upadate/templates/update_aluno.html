@@ -1,0 +1,48 @@
+{% extends "carden.html" %}
+{% load bootstrap5 %}
+
+<!--  *PÁGINA RELACIONADA COM ATUALIZAÇÕES NO CADASTRO DO ALUNO -->
+
+{% block conteudo %}
+<div class="col-md-6"> 
+    {% if sucesso %}
+        <!-- Informes de sucesso da atualização -->
+        <p class="alert alert-success">Atualização realizada com sucesso</p>
+        <a href="{% url 'cadastro:update-aluno'%}" class="btn btn-primary">Realizar um nova atualização</a>
+        <a href="{% url 'cadastro:pesquisa-aluno'%}" class="btn btn-primary">Lita de alunos</a>
+        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>    
+    
+    
+    {% elif pesquisa_aluno %}
+    <p>Olá {{usuario}}</p>
+    <h1>Infome o aluno para atualização.<br><br></h1>
+    <!-- Formulário de pesquisa -->
+    <form action="" method="post" >            
+        {% csrf_token %}
+        {% bootstrap_form pesquisa_form %}   
+        
+
+        <button class="btn btn-primary" type="submit">Pesquisar</button>
+        <a href="{% url 'cadastro:pesquisa-aluno'%}" class="btn btn-primary">Cancelar</a>
+        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>  
+    </form>
+
+
+    {% elif form_dados %}
+    <p>Olá {{usuario}}</p>
+    <h1>Realize a tualização<br><br></h1>
+    <!-- Formulário populado a ser atualizado -->
+    <form action="" method="post" >            
+        {% csrf_token %}
+        {% bootstrap_form form_preenchido %}       
+        
+
+        <button class="btn btn-primary" type="submit">Atualizar</button>       
+        <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary">Estoque</a>
+        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>  
+    </form>
+
+    {% endif %}
+
+</div>
+{% endblock %}

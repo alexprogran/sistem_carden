@@ -1,0 +1,68 @@
+{% extends "carden.html" %}
+{% load bootstrap5 %}
+
+{% block conteudo %}
+<div class="col-md-10"> 
+    {% if pesquisa %}
+    <div class="list-group">
+        <h1>Pesquisa entre as datas {{data_inicio|date:"d-m-Y"}} e data {{data_final|date:"d-m-Y"}}</h1>
+             <div class="container mt-5">
+                   <table class="table">
+                     <thead>
+                       <tr>
+                         <th scope="col">Produto</th>
+                         <th scope="col">Valor unitario</th>                      
+                         <th scope="col">Qunatindade</th>
+                         <th scope="col">Valor total</th>
+                         <th scope="col">Data</th>              
+                       </tr>
+                     </thead>
+                      
+                     <tbody>
+                       {% for pesquisa in query %}
+                       <tr>
+                           
+                         <td> {{pesquisa.produto__produto}}</td>                   
+                         <td> {{ pesquisa.valor_unitario }}</td>
+                         <td> {{ pesquisa.quantidade}}</td>
+                         <td> {{ pesquisa.valor_total}}</td>
+                         <td> {{ pesquisa.data|date:"d-m-Y"}}</td>
+                       </tr>   
+                     </tbody>             
+                       {% endfor %}
+      
+                   </table>
+               </div>
+                 
+               <div class="container" style="display: flex; font-size: 18px;margin-right: 20px; font-weight: bold;" >
+                 <p class="paragrafo"  style="margin-left: 300px;">Total de vendas: {{valor_total}}</p>
+                 <p class="outro-texto"  style="margin-left: 40px;" >Quantidades de produtos vendidos: {{quant_total}}</p>
+                             
+             </div>
+             <div class="col-md-6">
+                <a href="{% url 'cadastro:pesquisa-venda-entre-data'%}" class="btn btn-primary">Realizar nova pesquisa</a>  
+                <a href="{% url 'cadastro:pesquisa'%}" class="btn btn-primary">Home pesquisa</a>
+
+                </div> 
+          
+       </div>
+               
+     </div>
+    {% else %}
+    <h1><br><br>Informe a data início da pesquisa</h1>
+    <div class="col-md-6">
+      <form action="" method="post" >            
+          {% csrf_token %}
+          {% bootstrap_form pesquisa_form %}
+          
+          
+
+          <button class="btn btn-primary" type="submit">Enviar</button>
+          <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary">Lista vendas</a>
+
+          
+      </form>
+    </div>
+   {% endif %}
+</div>
+{% endblock %}

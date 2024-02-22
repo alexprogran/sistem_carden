@@ -1,0 +1,36 @@
+{% extends "carden.html" %}
+{% load bootstrap5 %}
+
+{% block conteudo %}
+<div class="col-md-6"> 
+    {% if sucesso %}
+        <p class="alert alert-success">Unidade cadastrada com sucesso</p>
+
+        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Acessar unidade</a>
+
+           
+    
+    {% elif unid_invalid %}
+    <p class="alert alert-danger" style="background-color: red; color: white;">{{unidade}}, UNIDADE JÁ CADASTRADA!</p>
+    <a href="{% url 'cadastro:cadast-unid'%}" class="btn btn-primary">Cadastrar uma nova unidade</a>
+        <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary">Acessar unidade</a>
+
+    
+    {% else %}
+    <p>Usuário: {{usuario}}</p>
+    <h1>Registre uma unidade</h1><br><br></h1>
+
+    <form action="" method="post" >            
+        {% csrf_token %}
+        {% bootstrap_form unid_form %}    
+        
+
+        <button class="btn btn-primary" type="submit">Enviar</button>
+        <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary">Cancelar</a>
+        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>  
+    </form>
+   
+    {% endif %}
+
+</div>
+{% endblock %}
