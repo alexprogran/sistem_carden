@@ -1,0 +1,31 @@
+{% extends "carden.html" %}
+{% load bootstrap5 %}
+
+{% block conteudo %}
+<div class="col-md-6"> 
+    {% if sucesso %}
+        <p class="alert alert-success">Débito registrado</p>
+        <a href="{% url 'cadastro:cadast-debito'%}" class="btn btn-primary" type="submit" role="button" style="width: 200px">Novo cadastro</a>        
+        <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary"type="submit" role="button" style="width: 200px">Lista de débito</a> 
+        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary"type="submit" role="button" style="width: 200px">Home</a>  
+        
+    
+    {% else %}
+    <p>Olá {{usuario}}</p>
+    <h1>Cadastro de débito - {{unidade}}<br><br></h1>
+
+    <form action="" method="post" >            
+        {% csrf_token %}
+        {% bootstrap_form formulario_debito %}
+        
+        
+
+        <button class="btn btn-primary" type="submit" role="button" style="width: 200px">Cadastrar</button>
+        <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button" style="width: 200px">Cancelar</a> 
+        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 200px">Home</a>  
+    </form>
+
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+
+{% extends "carden.html" %}
+{% load bootstrap5 %}
+
+
+{% block conteudo%}
+        
+
+        <p>Óla {{usuario}}</p>
+        <h1>Guia de cadastros - {{unidade}}<br><br></h1>
+   
+        <div class="col-md-12"> 
+            <div class="row">
+
+                <div class="col-md-3">
+                    <a href="{% url 'cadastro:cadast-user'%}" class="btn btn-primary" role="button" style="width: 300px">Usuário</a><br><br>
+                    <a href="{% url 'cadastro:cadast-unid'%}" class="btn btn-primary" role="button" style="width: 300px">Unidade</a><br><br>
+                    </div>
+    
+
+                <div class="col-md-3">
+                <a href="{% url 'cadastro:cadast-aluno'%}" class="btn btn-primary" role="button" style="width: 300px">Aluno</a><br><br> 
+                <a href="{% url 'cadastro:cadast-funcionario'%}" class="btn btn-primary" role="button" style="width: 300px">Funcionário</a><br><br>  
+                </div>
+
+                <div class="col-md-3 text-right">
+                    <a href="{% url 'cadastro:cadast-estoque-produto'%}" class="btn btn-primary" role="button" style="width: 300px">Estoque</a><br><br>
+                    <a href="{% url 'cadastro:cadast-categoria-produto'%}" class="btn btn-primary" role="button" style="width: 300px">Categoria</a><br><br>   
+                    
+                </div> 
+
+                <div class="col-md-3 text-right">
+                    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 300px">Home</a><br><br> 
+                    <a href="{% url 'cadastro:cadast-vendas'%}" class="btn btn-primary" role="button" style="width: 300px">Vendas</a><br><br>
+                    <a href="{% url 'cadastro:cadast-debito'%}" class="btn btn-primary" role="button" style="width: 300px">Débito</a><br><br>
+
+
+                    
+                </div>
+                         
+                
+                
+
+            </div>
+        </div>
+        
+
+        
+  
+
+        
+        
+    
+
+
+
+{% endblock %}

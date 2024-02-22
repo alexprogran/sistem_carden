@@ -1,0 +1,57 @@
+{% extends "carden.html" %}
+{% load bootstrap5 %}
+
+{% block conteudo %}
+
+
+{% if sucesso %}
+    <div class="col-md-6">
+        <p class="alert alert-success"> Produto cadastrado com sucesso</p>
+        <a href="{% url 'cadastro:cadast-estoque-produto'%}" class="btn btn-primary" role="button" style="width: 200px">Novo cadastro</a>
+        <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary" role="button" style="width: 200px">Ir para estoque</a>
+        <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary"  role="button" style="width: 200px">Home cadastro</a>    
+    </div>
+
+<div class="col-md-12">    
+    
+    {% else %} 
+    <style>
+        .extra-bold {
+            font-weight: 500;
+        }
+    </style>
+
+    <div class="container ">
+        <div class="row  extra-bold">
+            <div class="col-md-3">
+                <p class="text-light">Olá {{usuario}}</p>
+            </div>
+          <div>            
+    </div>
+    
+</div>
+    <h2>Cadastre produto - {{unidade}} <br><br></h2>  
+    <div class="container">      
+        <div class="row">
+            <div class="col-md-6">
+                <form action="" method="post">  
+                    {% csrf_token %}
+                    {% bootstrap_form estoque_form %}
+                    <button class="btn btn-primary" type="submit" role="button" style="width: 200px">Cadastrar</button>
+                    <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary" role="button" style="width: 200px">Estoque</a>
+                    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 200px">Home</a>  
+                </form>
+            </div>
+            <div class="col-md-6 text-right">
+                <p>*Para o primeiro cadastro de produto registre uma categoria.</p>
+            </div>
+        </div>   
+    </div>
+     
+        
+    </div>
+    
+    {% endif %}
+
+</div>
+{% endblock %}
