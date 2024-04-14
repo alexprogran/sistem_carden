@@ -2,15 +2,44 @@
 {% load bootstrap5 %}
 
 {% block conteudo %}
-<p>Óla {{usuario}}</p>
-<h1>Unidade {{unidade}}<br><br>
-<div class="col-md-12"> 
+<div class="container mt-4"  >
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-4 mx-auto text-center">
+            <p>*Olá {{ user|upper }}, unidade de acesso - {{unidade|upper}}</p>
+            <div class="list-group" style="background-color: white; color: black; border-radius: 20px;">
+                <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Acesse</em></strong></h2>
+            </div>
+        </div>
+    </div>
+</div>
+<br><br><br><br>
 
-    <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary" role="button" style="width: 300px">Cadastramentos</a>
-    <a href="{% url 'cadastro:pesquisa'%}" class="btn btn-primary" role="button" style="width: 300px">Pesquisas</a>
-    <a href="{% url 'cadastro:unidade'%}" class="btn btn-primary" role="button" style="width: 300px">Unidades</a>
-    <a href="{% url 'cadastro:login'%}" class="btn btn-primary" role="button" style="width: 300px">Login</a>
 
-</div><br><br>
+
+<div class="container "><br><br>
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-12">
+            <div class="text-center">
+
+                <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary"role="button" style="width: 448px; border-radius: 20px;">Cadastro</a><br><br>
+
+                <a href="{% url 'cadastro:pesquisa'%}" class="btn btn-primary"role="button" style="width: 448px; border-radius: 20px;">Pesquisa</a><br><br>
+                
+                <a href="{% url 'cadastro:unidade'%}" class="btn btn-primary"role="button" style="width: 448px; border-radius: 20px;">Unidade</a><br><br>
+                
+
+               
+            </div><br><br><br><br>
+            <div class="row justify-content-center align-items-center"><br><br><br><br><br><br><br>
+                <div class="text-center">
+                    <p>Sistem Carden</p>
+                </div>
+                
+            </div>
+
+        </div>
+    </div>
+</div>
+
 
 {% endblock %}

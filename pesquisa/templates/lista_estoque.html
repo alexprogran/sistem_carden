@@ -1,0 +1,77 @@
+{% extends "carden.html" %}
+{% load bootstrap5 %}
+
+<!-- A PÁGINA CONTÉM A LISTAGEM DO ESTOQUE -->
+
+{% block conteudo %}
+<p class="text-light">*Olá: {{user|upper}}, acessando unidade {{unid|upper}}.</p>
+<div class=" col-ms-4 col-md-4">
+  <div class="list-group" style="background-color: white; color: black; display: flex; justify-content: center; align-items: center; height: 40px; border-radius: 10px;">
+    <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Estoque atual</em></strong></h2>
+  </div>
+</div>
+
+<div class="col-md-12 ">  
+  <div class="list-group">
+    <div class="container mt-5">
+      <table class="table text-light">
+        <thead>
+          <tr>
+            <th scope="col">Produto</th>
+            <th scope="col">Código</th>                      
+            <th scope="col">Quantidade</th>
+            <th scope="col">Preço-custo</th>
+            <th scope="col">Total-custo</th>
+            <th scope="col">Preço-varejo</th>
+            <th scope="col">Total-varejo</th> 
+            <th scope="col">Categoria</th>                
+          </tr>
+        </thead>
+        <tbody>
+          {% for estoque in page_obj|dictsort:"produto" %} <!-- Organizando em ordem alfabética. -->
+          <tr>
+            <td>{{ estoque.produto }}</td>                   
+            <td>{{ estoque.codigo }}</td>
+            <td>{{ estoque.quantidade }}</td>
+            <td>{{ estoque.preco_custo }}</td>
+            <td>{{ estoque.total_custo }}</td>
+            <td>{{ estoque.preco_varejo }}</td>
+            <td>{{ estoque.total_varejo }}</td>
+            <td>{{ estoque.categoria }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="container" style="display: flex; font-size: 18px; margin-right: 20px; font-weight: bold;">
+      <p>{{num_page}}/{{tol_pag}} página(s)</p>
+      <p class="outro-texto" style="margin-left: 40px;">{{ quantidade_produto }} produto(s)</p>
+      <p class="outro-texto" style="margin-left: 40px;">{{ itens_total }} íten(s)</p>
+      <p class="paragrafo" style="margin-left: 40px;">Custo: {{ total_custo|floatformat:2 }}</p>
+      <p class="outro-texto" style="margin-left: 40px;">Varejo: {{ total_varejo|floatformat:2 }}</p>
+      <p class="outro-texto" style="margin-left: 40px;">Perc. lucro: {{ percentual_lucro_total }}%</p>
+      <p class="outro-texto" style="margin-left: 40px;">Lucro: {{ total_lucro_liquido }}</p>
+    </div>  
+</div><br>
+
+<div class="col-md-12">
+  {% if page_obj.has_previous %}
+  <a href="?page=1" class="btn btn-primary" role="button" style="width: 200px">Primeira</a>
+  <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-primary" role="button" style="width: 200px">Anterior</a>
+  {% endif %}
+
+  {% if page_obj.has_next %}
+  <a href="?page={{ page_obj.next_page_number }}" class="btn btn-primary" role="button" style="width: 200px">Próxima</a>
+  <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-primary" role="button" style="width: 200px">Última</a>
+  {% endif %}
+</div>
+
+<div class="col-md-12"><br>
+  <a href="{% url 'cadastro:cadast-estoque-produto'%}" class="btn btn-primary" role="button" style="width: 200px">Cadastrar produto</a> 
+  <a href="{% url 'cadastro:update-estoque'%}" class="btn btn-primary" role="button" style="width: 200px">Atualizar</a>
+  <a href="{% url 'cadastro:delete-produto'%}" class="btn btn-primary" role="button" style="width: 200px">Excluir produto</a>
+  <a href="{% url 'cadastro:unidade'%}" class="btn btn-primary" role="button" style="width:  200px">Unidade</a>
+  <a href="{% url 'cadastro:pesquisa'%}" class="btn btn-primary"  role="button" style="width: 200px">Home</a>
+</div>
+
+{% endblock %}

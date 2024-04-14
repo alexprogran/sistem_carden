@@ -1,59 +1,75 @@
 {% extends "carden.html" %}
 {% load bootstrap5 %}
 
-<!--  *PÁGINA RELACIONADA A EXCLUSÃO NO ESTOQUE -->
+<!--  *PÁGINA REALICIONADA A EXCLUSÃO DE PRODUTO NO ESTOQUE. -->
 
 {% block conteudo %}
-<div class="col-md-6"> 
-    {% if sucesso %}
-        <!-- Informes de sucesso de atualizações. -->
-        
-        <p class="alert alert-success">Produto excluido com sucesso.</p>
-        <a href="{% url 'cadastro:delete-produto'%}" class="btn btn-primary" role="button" style="width: 200px">Outro delete</a>
-        <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary"  role="button" style="width: 200px">Ir para estoque</a>
-        <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary" role="button" style="width: 200px">Seção pesquisa</a>  
-        
-        
-    {% elif produto_invalido %}
-        <p class="alert alert-danger">Produto inválido, não encontrado. </p>
-        <a href="{% url 'cadastro:delete-produto'%}" class="btn btn-primary"  role="button" style="width: 200px">Tentar novamente</a>
-        <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary"  role="button" style="width: 200px">Ir para estoque</a>
-        <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary"  role="button" style="width: 200px">Seção pesquisa</a>  
-        
+<div class="container">
+    <div class="row">        
+            {% if sucesso %}
+            <!-- Exclusão bem sucedida -->
+                    <div class="row justify-content-center align-items-center mx-auto col-ms-6 col-md-4"style="margin-top: 100px;" >
+                    <p class="alert alert-success text-center">O produto foi excluido com sucesso.</p>
+                    <div class="mb-2 mx-auto" style="margin-top: 50px;">
+                        <a href="{% url 'cadastro:delete-produto'%}" class="btn btn-primary " role="button" style="width: 430px; border-radius: 10px;">Outro Delete</a>
+                    </div>
+                    <div class="mb-2">
+                        <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary" role="button" style="width:430px; border-radius: 10px;">Ir para estoque</a>
+                    </div>  
+                    <div class="mb-2">
+                        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width:430px; border-radius: 10px;">Home</a>
+                    </div>                      
+                </div>           
+        </div>
 
-    {% elif pesquisa_produto %}
-    <p>Olá {{usuario}}</p>
-    <h1>Informe o produto à ser excluido.<br><br></h1>
-    <!-- Formulário de pesquisa -->
-    <form action="" method="post">            
-        {% csrf_token %}
-        {% bootstrap_form pesquisa_form %}
-        
-        
+        {% elif pesquisa_produto %}
+        <div class="row justify-content-center align-items-center mx-auto" style="position: relative; top: 50px;">
+            <div class=" col-ms-4 col-md-4 mx-auto text-center">
+                <p>*Olá {{ user|upper }}, informe o produto a ser deletado.</p>
+                <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                    <h2 style="font-family: 'Oswald', sans-serif;"><strong><em> Pesquisar Produto</em></strong></h2>
+                </div>
+            </div> </div><br><br> 
+       
 
-        <button class="btn btn-primary" type="submit"  role="button" style="width: 200px">Pesquisar</button>
-        <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary"  role="button" style="width: 200px">Cancelar</a>
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary"  role="button" style="width: 200px">Home</a>  
-    </form>
+            <div class="col-ms-4 col-md-4 mx-auto"  style="position: relative; top: 100px;">
+                <!-- Formulário de pesquisa -->
+                <form action="" method="post">            
+                    {% csrf_token %}
+                    {% bootstrap_form pesquisa_form %}                  
+
+                <button class="btn btn-primary" role="button"  style="width: 448px; border-radius: 10px; margin-top: 10px;">Pesquisar</button>
+                <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary" role="button"  style="width: 448px; border-radius: 10px; margin-top: 10px;">Cancelar</a>
+                </form>
+            </div>
 
 
-    {% else %}
-    <p>Olá {{usuario}}</p>
-    <h1>Produto para excusão.<br><br></h1>
-    
-    <!-- Formulário populado a ser atualizado -->
-    <form action="" method="post" >            
-        {% csrf_token %}
-        {% bootstrap_form form_produt %}
-        
-        
 
-        <button class="btn btn-primary" type="submit"  role="button" style="width: 200px">Excluir</button>       
-        <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary"  role="button" style="width: 200px">Cancelar</a>
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary"  role="button" style="width: 200px">Home</a>  
-    </form>
 
+        {% else %}
+        <div class="row justify-content-center align-items-center mx-auto" style="position: relative; top: -40px;">
+            <div class=" col-ms-4 col-md-4 mx-auto text-center">
+                <p>*Olá {{ user|upper }}, tem certeza que irá exclui o produto abaixo?</p>
+                <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                    <h2 style="font-family: 'Oswald', sans-serif;"><strong><em> Excluindo Produto</em></strong></h2>
+                </div>
+            </div> </div><br><br> 
+       
+        <div class="col-ms-4 col-md-4 mx-auto"  style="margin-top: -40px;">
+            <!-- Formulário populado a ser atualizado -->
+            <form action="" method="post" >            
+                {% csrf_token %}
+                {% bootstrap_form form_produt %}
+                
+                
+
+                <button class="btn btn-primary" role="button"  style="width: 448px; border-radius: 10px; margin-top: 10px;">Excluir</button>
+                <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary" role="button"  style="width: 448px; border-radius: 10px; margin-top: 10px;">Estoque</a>       
+            </form>
+        </div>
+    </div>
+</div>
     {% endif %}
 
-</div>
+
 {% endblock %}

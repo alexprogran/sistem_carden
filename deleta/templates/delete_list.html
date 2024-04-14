@@ -1,0 +1,53 @@
+
+{% extends "carden.html" %}
+{% load bootstrap5 %}
+<!-- PÁGINA RELACIONADA A EXCLUSÃO DE DÉBITO DO ALUNO. -->
+{% block conteudo %}
+  {% if sucesso %}
+  <div class="container mt-5">
+    <div class=" row col-md-4 mx-auto mt-5">
+      <p1 class="alert alert-success">Os debitos de {{aluno|upper}} foram deletados.</p1>
+    </div>
+    <div class=" col-md-10 mx-auto mt-5">         
+      <table class="table  text-light">
+        <thead>
+          <tr>
+          <th scope="col">Data</th> 
+            <th scope="col">Quantidade</th> 
+            <th scope="col">Produtos consumidos</th>  
+            <th scope="col">Valor unitário</th>                                              
+            <th scope="col">Valor total</th>             
+          </tr>
+        </thead>
+        
+        <tbody>
+          {% for debito in infor_debito %}
+          <tr>
+
+            <!-- <th scope="row">{{ debito.aluno__nome }}</th> -->
+            <td> {{ debito.data|date:"d-m-Y"}}</td>
+            <td> {{ debito.quantidade}}</td>
+            <td> {{ debito.produto }}</td>
+            <td> {{ debito.valor_unitario}}</td>                     
+            <td> {{ debito.valor_total}}</td>
+            
+          </tr>   
+                          
+          {% endfor %}
+
+      </table>
+    </div>
+    <div class="col-md-12 mx-auto">  
+      <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px; margin-top: 10px">Débitos</a>
+      <a href="{% url 'cadastro:pesquisa'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px;margin-top: 10px">Home</a>
+    </div>       
+  </div>
+  {% endif %}
+
+
+
+
+ 
+
+{% endblock %}
+

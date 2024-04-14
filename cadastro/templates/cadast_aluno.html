@@ -1,41 +1,66 @@
 {% extends "carden.html" %}
 {% load bootstrap5 %}
-
-{% block conteudo %}
-<div class="col-md-6">
-    <!-- Cadastro relalizado com sucesso  -->
-    {% if sucesso %}
-        <p class="alert alert-success"> Cadastro de {{aluno|upper}} realizado com sucesso</p>
-        <a href="{% url 'cadastro:cadast-aluno'%}" class="btn btn-primary">Realisar um novo cadastro</a>  
-        <a href="{% url 'cadastro:pesquisa-aluno'%}" class="btn btn-primary">Alunos</a>
-
-
-    <!-- Caso o aluno informado não exista no banco de dados -->
-    {% elif not_exist %}
-    <div class="col-md-12">
-    <p class="alert alert-danger">Nome inválido, {{nome_form|upper}} já é um nome cadastrado</p>
-    <a href="{% url 'cadastro:pesquisa-aluno'%}" class="btn btn-primary">Cancelar</a>
-    <a href="{% url 'cadastro:cadast-aluno'%}" class="btn btn-primary">Tentar Novamente</a>
+        
+{% block conteudo %}     
+<!-- Cadastro realizado com sucesso  --> 
+{% if sucesso %}
+<div class="row justify-content-center align-items-center mx-auto col-ms-6 col-md-4"style="margin-top: 20px;" >
+    <p class="alert alert-success text-center">O cadastro de {{aluno}} foi realizado com sucesso.</p>
+    <div class="mb-2 mx-auto" style="margin-top: 50px;">
+        <a href="{% url 'cadastro:cadast-aluno'%}" class="btn btn-primary " role="button" style="width: 430px; border-radius: 10px;">Novo cadastro</a>
     </div>
-
-    {% else %}
-    <!-- Usuário logado -->
-    <p >Olá: {{user}}</p>
-    
-    <h1>Unidade de cadastro - {{unidade}}<br><br></h1>
-    <form action="" method="post" >                   
-        {% csrf_token %}
-        {% bootstrap_form aluno_form%}
-        
-        
-
-        <button class="btn btn-primary" type="submit">Enviar</button>
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a> 
-        <a href="{% url 'cadastro:pesquisa-aluno'%}" class="btn btn-primary">Alunos</a>  
-    </form>
-    </form>
-
-    {% endif %}
-
+    <div class="mb-2">
+        <a href="{% url 'cadastro:lista-aluno'%}" class="btn btn-primary" role="button" style="width:430px; border-radius: 10px;">Alunos</a>
+    </div>
+    <div class="mb-2">
+        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary"  role="button" style="width: 430px; border-radius: 10px;">Home</a>
+    </div>       
+    <!-- Rodapé -->
+    <div class="container">
+        <div class="row justify-content-center align-items-center mt-4">
+            <div class=" col-ms-4 col-md-5 text-center" style="font-size: 20px;margin-top: 80px;">  
+                    <p>Sistem Carden</p>
+            </div>
+                
+        </div>
+    </div>
+<!-- Caso o aluno informado não exista no banco de dados -->
+{% elif not_exist %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <p class="alert alert-danger">Nome inválido, {{ nome_form|upper }} já é um nome cadastrado</p>
+            <a href="{% url 'cadastro:pesquisa-aluno' %}" class="btn btn-primary" role="button" style="width: 200px;">Cancelar</a>
+            <a href="{% url 'cadastro:cadast-aluno' %}" class="btn btn-primary" role="button" style="width: 200px;">Tentar Novamente</a>
+        </div>
+    </div>
 </div>
+{% else %}            
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="margin-top: -70px;">
+        <div class=" col-ms-4 col-md-4  text-center">
+            <p>*Olá {{ user|upper }}, unidade de acesso - {{unidade|upper}}</p>
+            <div class="list-group mx-auto" style="background-color: white; color: black; border-radius: 10px;">
+                <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Cadastre Aluno</em></strong></h2>
+            </div>
+        </div>       
+    </div><br><br>   
+    <div class= "row justify-content-center align-items-center">
+        <div class=" col-ms-4 col-md-4">    
+            <form action="" method="post">
+                {% csrf_token %}
+                {% bootstrap_form aluno_form %}
+                <button class="btn btn-primary" type="submit" role="button" style="width:448px; border-radius:10px">Cadastrar</button>
+                <a href="{% url 'cadastro:lista-aluno' %}" class="btn btn-primary" role="button" style="width: 448px; margin-top: 10px; border-radius:10px">Alunos</a>
+                <a href="{% url 'cadastro:home-carden' %}" class="btn btn-primary" role="button" style="width: 448px; margin-top: 10px; border-radius:10px">Home</a>
+            </form>             
+            <!-- <div class="row justify-content-center align-items-center"><br><br>
+                <div class="col-md-4 mx-auto text-center">
+                    <p>Sistem Carden</p>
+                </div>
+            </div> -->
+        </div>
+    </div>
+</div>          
+    {% endif %} 
 {% endblock %}

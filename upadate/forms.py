@@ -1,9 +1,12 @@
+import re
+import datetime
 from collections.abc import Mapping
 from typing import Any
 from django import forms
 from django.forms.utils import ErrorList
 
-from cadastro.models import AlunoModel, CadastrosVendaModel, CategoriaProdutoModel, DebitoModel, EstoqueModel
+
+from cadastro.models import AlunoModel, CadastrosVendaModel, CategoriaProdutoModel, DebitoModel, EstoqueModel, ModelAluno
 
 class FormUpdateDebitoModelAluno(forms.Form):
     nome_atual = forms.CharField(label='Aluno',max_length=25)   
@@ -43,6 +46,7 @@ class FormUpdateDebitoModelAluno(forms.Form):
 
 
 
+
 class FormUpadateDebitoModelProduto(forms.Form):
     produto_exitente = forms.CharField(label='Produto',max_length=25)
     update_nome_produto = forms.CharField(label='Produto para update',max_length=25)
@@ -70,17 +74,27 @@ class FormUpadateDebitoModelProduto(forms.Form):
         return produto_update   
 
 
+
+
 class FormUpdateEstoque(forms.ModelForm):
     """"
-    Formlário populado para update do Estoque.
-    (Lebrando, que ao popular o formulário, para o django, o campo que refenrencia o modelo(__str__) 
-    precisa esta presente no formulário, e este não pode ser editado, por isso a necessidade de  
-    ocultar o campo produto e criar um campo "cópia" para edita-lo e atualiza-lo.)     """
-   
+    Formulário populado com os dados do estoque a serem editados.
+    
+    * Observação: 
+        foi necessário apresentar o campo "produto" como campo oculto 
+        e em paralelo criar um campo (campo_oculto) inicializado com
+        o valor do campo produto para edita-lo e devolver a alteração 
+        feita  ao campo produto no momento do update.
+        Manobra necessária devido a problemas para editar o 
+        campo produto diretamente - presume-se que seja o fato deste 
+        campo "representar" o modelo EstoqueModel no método "__str__".
+
+    """
+
    # criamos um campo oculto e opcional para o produto
     produto = forms.CharField(widget=forms.HiddenInput(), required=False)
 
-    # este campo recebe 
+   
     campo_oculto = forms.CharField(label='Produto',max_length=25)
     
     class Meta:
@@ -107,49 +121,55 @@ class FormUpdateEstoque(forms.ModelForm):
         empty_label="Selecione uma categoria",
 
     )  
-          
+
+
+
 
 class FormUpdateEstoquePorProduto(forms.Form):    
 
     """Formulário para a pesquisa do produto a ser atualizado no estoque."""
+
+
     produto = forms.CharField(label='Produto',max_length=25)
 
     def __init__(self, *args, **kwargs):
         self.usuario = kwargs.pop('usuario')
         self.unidade = kwargs.pop('unidade')
         super(FormUpdateEstoquePorProduto,self).__init__(*args, **kwargs)
-       
-    # def clean_produto(self):
-    #     produto_form = self.cleaned_data['produto']
-    #     if not EstoqueModel.objects.filter(usuario=self.usuario, unidade=self.unidade, produto=produto_form).exists():
-    #        raise forms.ValidationError('Produto inválido')
-    #     return produto_form
-        
-    # produto = forms.ModelChoiceField(
-    #     queryset=EstoqueModel.objects.all(),
-    #     to_field_name='produto',
-    #     empty_label='Selecione um produto' 
-    #     ) 
+
+    # Checando a existência do produto.  
+    def clean(self):
+        produt = self.cleaned_data.get('produto')
+        cleand_data = super().clean()
+
+        if not EstoqueModel.objects.filter(usuario=self.usuario,
+        unidade=self.unidade,produto=produt):
+            raise forms.ValidationError('Produto inválido, não encontrado nos registros.')
+
+
 
 
 class UpdateAlunoFormPesquisa(forms.Form):
 
     nome_aluno = forms.CharField(label='Nome', max_length=25)
 
-    # def __init_(self, *args,**kwargs):
+    def __init__(self, *args,**kwargs):
 
-    #     self.usuario = kwargs.pop['usuario_logado']
-    #     self.unidade = kwargs.pop['unidade']
-    # # Formulário de pesquisa aluno
+        self.usuario = kwargs.pop('usuario')
+        self.unidade = kwargs.pop('unidade')
+        super().__init__(*args, **kwargs)
+    # Formulário de pesquisa aluno
     
-
-    # nome_aluno = forms.ModelChoiceField(
-      
-    #     queryset=AlunoModel.objects.filter(usuario=self.usuario),
-    #     to_field_name='nome',
-    #     empty_label='Selecione um aluno',
+    def clean(self):
+        cleaned_data = super().clean()
+        aluno = self.cleaned_data.get('nome_aluno')
         
-    # )
+        if not AlunoModel.objects.filter(
+        usuario=self.usuario, unidade=self.unidade,nome=aluno).exists():
+            raise forms.ValidationError("Nome inválido, não cadastrado.")
+        return cleaned_data
+       
+
 
 
 class UpdateAlunoForms(forms.ModelForm):
@@ -157,7 +177,7 @@ class UpdateAlunoForms(forms.ModelForm):
     
     # criamos um campo oculto e opcional para o produto
     nome = forms.CharField(widget=forms.HiddenInput(), required=False)
-
+   
     # este campo recebe 
     clone_fild_name = forms.CharField(label='Nome',max_length=25)
 
@@ -166,25 +186,37 @@ class UpdateAlunoForms(forms.ModelForm):
         model = AlunoModel
         fields = ['clone_fild_name','nome','turma', 'responsavel','telefone_responsavel']
 
-
     def __init__(self, *args, **kwargs):
+       
+        super().__init__(*args, **kwargs)
         
-        super(UpdateAlunoForms, self).__init__(*args, **kwargs)
         if self.instance:
             self.fields['clone_fild_name'].initial = self.instance.nome
-        # Preencha o campo produto_original com o valor atual do campo produto
-                  
+            
+  
 
 
 class UpdateVendasformPesquisa(forms.ModelForm):
-    # Formulário  pesquisa-vendas 
+    """
+    Este fomulário realiza a pesquisa para a indetificação  
+    do registro de vendas.
+
+    Raise:
+        forms.Validations - 
+        * se o produto informado não for encontrado nos cadastros, 
+
+        * se não houver registro da venda do produto na data especificada,
+        
+        *se a data informada não estiver no formato esperado.
+
+    """
     
     class Meta:
         model = CadastrosVendaModel
         fields = ['produto','data']
         labels = {
             'data': '*Infomr a data da venda'
-        }
+            }
         
 
     def __init__(self, *args, **kwargs):
@@ -192,16 +224,38 @@ class UpdateVendasformPesquisa(forms.ModelForm):
         self.unidade = kwargs.pop('unidade')
         super().__init__(*args, **kwargs)
 
+    # Validações.  
+    def clean(self):
+        data_form = self.cleaned_data.get('data')
+        produto_form = self.cleaned_data.get('produto')
+        clean_data = super().clean()
+
+        # Validações do produto
+        if not EstoqueModel.objects.filter(usuario=self.usuario, 
+            unidade=self.unidade, produto=produto_form).exists():
+                raise forms.ValidationError(f'''Digite um produto váldo,                                             
+                não houve venda de {produto_form} neste data.''') 
+        
+        elif not CadastrosVendaModel.objects.filter(usuario=self.usuario, 
+            unidade=self.unidade, produto=produto_form, data=data_form).exists():
+                # if not data_form == None:
+                    # data_formatada = datetime.datetime.strftime(data_form, '%d/%m/%Y')
+
+                raise forms.ValidationError(f'''Não encontrado venda de {produto_form}
+                na data especificada.''') 
+        
+        # Validações de data
+        elif not data_form == None:
+           
+            if not CadastrosVendaModel.objects.filter(data=data_form).exists():
+                raise forms.ValidationError('Não existe registro de venda para esta data.')
+        
+        else:
+            raise forms.ValidationError('''Data inválida.
+            Formato esperado, exemplo: "00/00/0000 (mês/dia/ano).     
+            '''
+            )
   
-        self.fields['produto'] = forms.ModelChoiceField(
-            label='*Selecione um produto para a correção',
-            queryset=EstoqueModel.objects.filter(usuario=self.usuario,
-            unidade=self.unidade), 
-            to_field_name='produto',
-            empty_label='Selecione produto',      
-              
-    )
-      
 
 
    
@@ -253,13 +307,13 @@ class UpdateVendasForm_(forms.ModelForm):
         if self.instance:
             self.fields['recebe_produto'].initial = self.instance.produto 
             self.fields['quantidade_inicial'].initial = self.instance.quantidade
-
     
 
 
 
-class UpdateVendasForm(forms.ModelForm): 
-    # FORMULÁRIO UpdateVendasForm - POPULADO COM OS DADOS DA INSTÂNCIA 
+class UpdateVendasForm(forms.ModelForm):
+    
+    """ Formulário populado com os dados da intância a ser atualaizada. """     
 
     # Campo oculto e opcional para o produto
     # produto = forms.CharField(widget=forms.HiddenInput(), required=False)
@@ -273,7 +327,7 @@ class UpdateVendasForm(forms.ModelForm):
     # Campo oculto e opcional para quantidade.
     quantidade_inicial = forms.CharField(widget=forms.HiddenInput(), required=False)
 
-    # O campo Quantidade será somente para leitura do usuário
+    
     quantidade = forms.CharField(
         label='*Quantidade para o produto de troca.*OPCIONAL.',max_length=25
     )
@@ -282,6 +336,7 @@ class UpdateVendasForm(forms.ModelForm):
         model = CadastrosVendaModel
         fields = ['produto','field_clone', 'quantidade', 'valor_unitario', 'data']    
 
+    
     # Inicializador  
     def __init__(self, *args, **kwargs):
         self.usuario = kwargs.pop('usuario')
@@ -295,13 +350,57 @@ class UpdateVendasForm(forms.ModelForm):
             queryset=EstoqueModel.objects.filter(usuario=self.usuario,
             unidade=self.unidade).order_by('produto') , 
             to_field_name='produto',
-             empty_label='Selecione produto',
-           
-                     
+             empty_label='Selecione produto',                       
         )       
-       
+
         # Inicializar o campo "quantidade_inicial" com o valor atual da instância
         if self.instance:
             self.fields['quantidade_inicial'].initial = self.instance.quantidade
             self.fields['field_clone'].initial = self.instance.produto
 
+
+
+
+class UpadatePesquisaRegistroAluno(forms.ModelForm):
+    # Fomulário de pesquisa para update de registro do aluno.
+    class Meta:
+       model = ModelAluno
+       fields = ['nome']
+
+    
+    def __init__(self, *args, **kwargs):
+        self.usuario = kwargs.pop('usuario')
+        self.unidade = kwargs.pop('unidade')
+        super().__init__(*args, **kwargs)
+        self.fields['nome'].widget.attrs.update({'placeholder':'*Informe aluno para atualização.'})
+
+
+    def clean(self):
+        nome_aluno = self.cleaned_data['nome']
+        cleaned_data  = super().clean()
+
+        if not ModelAluno.objects.filter(usuario=self.usuario, 
+        unidade=self.unidade, nome=nome_aluno).exists():
+            raise forms.ValidationError(f'Nome inválido, {nome_aluno} não se encontra em nossos registros.')
+    
+
+       
+
+class UpdateCadastroAluno(forms.ModelForm):
+
+    # Formulário para registro do aluno.
+    
+    nome = forms.CharField(widget=forms.HiddenInput(), required=False)
+    clone_fild_name = forms.CharField(label='Aluno',max_length=25)
+
+    class Meta:
+        model = ModelAluno
+        fields = ['clone_fild_name','nome', 'turma', 'responsavel', 'tel_responsavel']
+
+    def __init__(self,*args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance:
+            self.fields['clone_fild_name'].initial = self.instance.nome
+    
+   

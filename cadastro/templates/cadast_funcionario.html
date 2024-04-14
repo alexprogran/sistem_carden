@@ -1,28 +1,51 @@
 {% extends "carden.html" %}
 {% load bootstrap5 %}
 
+     <!-- ESTA TEMPLATE ESTA RELAIONADA COM O CADASTRO DO FUNCIONÁRIO -->
 {% block conteudo %}
-<div class="col-md-6"> 
-    {% if sucesso %}
-        <p class="alert alert-success"> Funcionário cadastrado com sucesso</p>
-        <a href="{% url 'cadastro:cadast-funcionario'%}" class="btn btn-primary">Novo cadastro</a>  
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>  
-    </form>
-
-    
-    {% else %}
-    <h1>Cadastros de funcionário<br><br></h1>
-    <form action="" method="post" >            
-        {% csrf_token %}
-        {% bootstrap_form funcionario_form %}
-        
+<div class="container">
+    <div class="row">
         
 
-        <button class="btn btn-primary" type="submit">Cadastrar</button>
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>  
-    </form>
+            {% if sucesso %}
 
-    {% endif %}
+                <div class=" col-sm-6 col-md-4"> 
+                    <p class="alert alert-success"> Funcionário cadastrado com sucesso</p>
+                    <a href="{% url 'cadastro:cadast-funcionario'%}" class="btn btn-primary">Novo cadastro</a>  
+                    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>            
+                </div>
+            
+            {% else %}
+                        
+           
+                <div class="row justify-content-center align-items-center">
+                    <div class=" col-sm-6 col-md-4 mx-auto text-center">
+                        <p>*Olá {{ user|upper }}, unidade de acesso - {{unidade|upper}}</p>
+                        <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                            <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Cadastro de Funcionário</em></strong></h2>
+                        </div>
+                    </div>
+                </div>
+            </div><br><br>
 
+            <div class=" col-sm-6 col-md-4 mx-auto ">
+                <form action="" method="post" > 
+
+                    <!-- Fomulário para cadastro do funcionário-->
+                    {% csrf_token %}
+                    {% bootstrap_form funcionario_form %}
+                    
+                    
+
+                    <button class="btn btn-primary" type="submit" role="button" style="width:224px; border-radius: 10px;">Cadastrar</button>
+                    <a href="{% url 'cadastro:home-carden' %}" class="btn btn-primary" role="button" style="width: 224px;border-radius: 10px;">Home</a>
+  
+                </form>
+            </div>
+
+            {% endif %}
+
+        </div>
+    </div>
 </div>
 {% endblock %}

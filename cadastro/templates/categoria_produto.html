@@ -1,33 +1,53 @@
 {% extends "carden.html" %}
 {% load bootstrap5 %}
 
+<!-- ESTA TEMPLATE ESTA RELACIONADA COM O CADASTRO DE CATEGORIA PARA O PRODUOTO. -->
+
+
 {% block conteudo %}
 
-<p>Usuário: {{usuario}}</p>
-
-<div class="col-md-6"> 
-    
-    {% if sucesso %}
-        <p class="alert alert-success"> Categoria cadastrada com sucesso</p>
-        <a href="{% url 'cadastro:cadast-categoria-produto'%}" class="btn btn-primary">Novo cadastro</a>          
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>  
-    
-
-    
-    {% else %}
-    <h1>Cadastre uma categoria<br><br></h1>    
-
-    <form action="" method="post" >              
-        {% csrf_token %}
-        {% bootstrap_form categoria_form %}
+<div class="container">
+    <div class="row">   
         
-       
+        {% if sucesso %}
+        <div class="row justify-content-center align-items-center mx-auto col-ms-6 col-md-4"style="margin-top: 20px;" >
+            <p class="alert alert-success text-center">Categoria cadastrada com sucesso</p>
+            <div class="mb-2 mx-auto">
+                <a href="{% url 'cadastro:cadast-categoria-produto'%}" class="btn btn-primary " role="button" style="width: 430px; border-radius: 10px;">Novo cadastro</a>
+            </div>
+            <div class="mb-2">
+                <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary" role="button" style="width:430px; border-radius: 10px;">Ver Categorias</a>
+            </div>
+            <div class="mb-2">
+                <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary"  role="button" style="width: 430px; border-radius: 10px;">Home</a>
+            </div>    
+        </div>
 
-        <button class="btn btn-primary" type="submit">Cadastrar</button>
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>  
-    </form>
+        
+        {% else %}
+        <div class="row justify-content-center align-items-center mx-auto" style="position: relative; top: 50px;">
+            <div class=" col-ms-6 col-md-4 mx-auto text-center">
+                <p>*Olá {{ user|upper }},informe uma categoria para cadastro.</p>
+                <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                    <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Cadastro De Categoria</em></strong></h2>
+                </div>
+            </div>
+        </div><br><br>
 
-    {% endif %}
+        <div class=" col-ms-6 col-md-4 mx-auto" style="position: relative; top: 100px;">
+            <form action="" method="post" > 
 
+                <!-- formulário para cadastro de caterogia-->
+                {% csrf_token %}
+                {% bootstrap_form categoria_form %}    
+
+                <button class="btn btn-primary" type="submit" role="button" style="width: 448px; border-radius: 10px; margin-top: 10px;">Cadastrar</button>
+                <a href="{% url 'cadastro:home-carden'%}"class="btn btn-primary" type="submit" role="button" style="width: 448px; border-radius: 10px; margin-top: 10px">Home</a>  
+            </form>
+        </div>
+    </div>
 </div>
+        {% endif %}
+
+    
 {% endblock %}

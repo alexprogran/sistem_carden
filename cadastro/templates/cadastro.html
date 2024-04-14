@@ -6,52 +6,44 @@
 {% block conteudo%}
         
 
-        <p>Óla {{usuario}}</p>
-        <h1>Guia de cadastros - {{unidade}}<br><br></h1>
-   
-        <div class="col-md-12"> 
-            <div class="row">
-
-                <div class="col-md-3">
-                    <a href="{% url 'cadastro:cadast-user'%}" class="btn btn-primary" role="button" style="width: 300px">Usuário</a><br><br>
-                    <a href="{% url 'cadastro:cadast-unid'%}" class="btn btn-primary" role="button" style="width: 300px">Unidade</a><br><br>
-                    </div>
-    
-
-                <div class="col-md-3">
-                <a href="{% url 'cadastro:cadast-aluno'%}" class="btn btn-primary" role="button" style="width: 300px">Aluno</a><br><br> 
-                <a href="{% url 'cadastro:cadast-funcionario'%}" class="btn btn-primary" role="button" style="width: 300px">Funcionário</a><br><br>  
-                </div>
-
-                <div class="col-md-3 text-right">
-                    <a href="{% url 'cadastro:cadast-estoque-produto'%}" class="btn btn-primary" role="button" style="width: 300px">Estoque</a><br><br>
-                    <a href="{% url 'cadastro:cadast-categoria-produto'%}" class="btn btn-primary" role="button" style="width: 300px">Categoria</a><br><br>   
-                    
-                </div> 
-
-                <div class="col-md-3 text-right">
-                    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 300px">Home</a><br><br> 
-                    <a href="{% url 'cadastro:cadast-vendas'%}" class="btn btn-primary" role="button" style="width: 300px">Vendas</a><br><br>
-                    <a href="{% url 'cadastro:cadast-debito'%}" class="btn btn-primary" role="button" style="width: 300px">Débito</a><br><br>
-
-
-                    
-                </div>
-                         
-                
-                
-
-            </div>
-        </div>
-        
-
-        
+<div class="container">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-4 mx-auto text-center">
+            <p>*Olá {{ user|upper }}, unidade de acesso - {{unidade|upper}}</p>
+            <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Cadastre</strong></h2>
+            </div>  
+          </div>        
+    </div><br>
+      
   
+ 
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-3 mx-1"><br><br>
+            <a href="{% url 'cadastro:cadast-user'%}" class="btn btn-primary mb-3" role="button" style="width:  100%; border-radius: 20px;">Usuário</a>
+            <a href="{% url 'cadastro:cadast-unid'%}" class="btn btn-primary mb-3" role="button" style="width:  100%; border-radius: 20px;">Unidade</a>
+            <a href="{% url 'cadastro:cadast-aluno'%}" class="btn btn-primary mb-3" role="button" style="width: 100%; border-radius: 20px;">Aluno</a>
+        </div>
+        <div class="col-md-3 mx-1"> <br><br>
+            <a href="{% url 'cadastro:cadast-funcionario'%}" class="btn btn-primary mb-3" role="button" style="width:  100%; border-radius: 20px;">Funcionário</a>
+            <a href="{% url 'cadastro:cadast-estoque-produto'%}" class="btn btn-primary mb-3" role="button" style="width:  100%; border-radius: 20px;">Estoque</a>
+            <a href="{% url 'cadastro:cadast-categoria-produto'%}" class="btn btn-primary mb-3" role="button" style="width: 100%; border-radius: 20px;">Categoria</a>
+        </div>
 
-        
-        
-    
+        <div class="col-md-3 mx-1"> <br><br>
+            <a href="{% url 'cadastro:cadast-vendas'%}" class="btn btn-primary" role="button" style="width: 100%; border-radius: 20px;">Vendas</a><br><br>
+            <a href="{% url 'cadastro:cadast-debito'%}" class="btn btn-primary" role="button" style="width: 100%; border-radius: 20px;">Débito</a><br><br>
+            <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 100%; border-radius: 20px;">Home</a><br><br> 
+            
+        </div>
+    </div>
+</div><br><br><br><br>
 
 
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-4 mx-auto text-center">
+            <p>Sistem Carden</p>
+        </div>
+    </div>
 
 {% endblock %}

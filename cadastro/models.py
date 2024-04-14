@@ -1,11 +1,16 @@
+from django.core.cache import cache
 import random
+import datetime
+
+
 from django import forms
 from django.db import models
 from django.core.validators import RegexValidator
 from django.db.models import Max
 from decimal import Decimal
 from django.db.models import Sum
-import datetime
+import numpy as np
+
 
 class AlunoModel(models.Model):
   
@@ -17,7 +22,7 @@ class AlunoModel(models.Model):
     telefone_responsavel = models.CharField(verbose_name='Contato do responsável',max_length=25)   
     
     def exist_aluno(self, usuario, unidade, name_aluno):
-        """O método " exist_aluno" checa a não existência do registro"""
+        """O método checa a não existência do registro"""
         if not AlunoModel.objects.filter(
                 nome=name_aluno, usuario=usuario,unidade=unidade).exists():
                    
@@ -25,7 +30,6 @@ class AlunoModel(models.Model):
        
     def __str__(self):
         return self.nome
-
 
 
 class CategoriaProdutoModel(models.Model):
@@ -37,7 +41,6 @@ class CategoriaProdutoModel(models.Model):
 
     def __str__(self):
         return self.categoria
-
 
 
 class EstoqueModel(models.Model):
@@ -53,10 +56,9 @@ class EstoqueModel(models.Model):
     categoria =  models.CharField(verbose_name='Categoria', max_length=25, null=True)
 
     def chec_produt(self, user, unid, product):
-        """
-            O método "chec_produto" realiza a checagem da existência do produto no estoque.
 
-         """
+        """ O método  realiza a checagem de existência do produto no estoque."""
+
         if not EstoqueModel.objects.filter(usuario=user, unidade=unid, produto=product).exists():
             invalid = {'produto_invalido':True}
             return invalid
@@ -64,8 +66,9 @@ class EstoqueModel(models.Model):
 
     def sum_col(self,user,unid):
         '''
-        O método "sum_col " realiza a soma das colunas especificadas e retorna um dicionário
-        contendo um conjunto de chaves que tem como valores a soma agregada das colunas.
+        O método  realiza a soma das colunas especificadas em uma a
+        agregação e retorna um dicionário cuja as chaves posuem 
+        como valor o resultado da adição.
         '''
         # Obitendo o dicionário cujo os valores das chaves é o soma agregada das colunas.
         total = EstoqueModel.objects.filter(usuario=user,unidade=unid).aggregate(
@@ -75,11 +78,11 @@ class EstoqueModel(models.Model):
         )
         return total
 
+
     def gerador_de_codigo(self):
         """ 
-        O método gera numerais  que  são resultados do resgate do ultimo id do modelo
-        EstoqueModel e a soma por mais um. Uma das utilizações para estes númerais é 
-        sevirem como valores para códigos na tabela.
+        O método gera númerais a serem utilizados como códigos nos 
+        variados cadastramentos.
 
         """
         registro_estoque = EstoqueModel.objects.count()#buscando registros 
@@ -90,14 +93,10 @@ class EstoqueModel(models.Model):
             codigo = 1
         return codigo
     
+
     def atualize_db_estoque(self, user , unid,produt_form,quant_form):       
         
-        '''  
-        O método atualize_db_estoque atualiza a quantidade de produto no 
-        estoque em função da venda ,subtraindo, do estoque, as mesmas 
-        quantidades do produto na venda.     
-
-        '''           
+        '''  O método realiza atualizações no estoque . '''           
         
         instance = EstoqueModel.objects.get(usuario=user,
         unidade=unid, produto=produt_form)#instância a ser atualizada
@@ -113,83 +112,126 @@ class EstoqueModel(models.Model):
         total_varejo=novo_total_varejo , total_custo=novo_total_custo)
 
 
-
-    def corrige_db_estoque  (self, user , unid,produt_corrig ,produt_edit,quant_form):
+    def corrig_db_estoque  (*args,**kwargs):
         '''  
-        O método corrige_db_estoque corrige a quantidade dos produtos envolvidos 
-        na autualização, devolvendo a quantidade, registrada(eroneamente),  de saida do produto
-        ao estoque e subtrai da quantidade do produto  de correção para os ajustes no estoque.
+        O método realizar ajustes no  estoque decorrentes de
+        correções do banco de dados de registro de vendas.
         
-        --> Parâmetros passados: user(usuário), unid(unidade), 
-        produt_corrig(produto indicado par troca),
-        produt_edit(produto indicado para a correção) 
-        quant_form(quantidade do produto para a correção)<--
+        A Args:
 
-        '''     
-        # lista de campos que irá definir a instâcia à atualização.
-        lista_produto = [produt_edit, produt_corrig]  
+            user: usuário,
+            unid: unidade,
+            produt_inicio: produto que é incicializado, no formulário, para a correção,
+            produt_final : produto final para atualização,
+            quant_inicio: quantidade do produto incializado para correção,
+            quant_editada: quantidade fornecida pelo usuário para correção,
+            date: data do registro
 
+            Kwargs:
 
-        for produt in lista_produto:
+                unic: True -  indica que irá ter apenas um produto para atualizar.
 
+        '''
+        user = kwargs.get('usuario')
+        unid = kwargs.get('unidade')
+        produt_inicio = kwargs.get('produt_inicial')
+        produt_final = kwargs.get('produt_final')
+        quant_editada = kwargs.get('quant_editada')
+        quant_inicio=kwargs.get('quant_inicio')
+        unic = kwargs.get('unic')
+                 
+
+        # Para atualizar um único produto no estoque.
+        if unic: 
+             
             # Indentificando a instância a ser atualizada.
             instance = EstoqueModel.objects.get(usuario=user,
-            unidade=unid, produto=produt )
-            
-            # Subtraindo a quantidade do produto  de correção no estoque
-            if produt == produt_edit:
-                
-                # os novos valores dos campos a serem atualizados
-                nova_quantidade = instance.quantidade - int( quant_form )
-                novo_total_custo = nova_quantidade * instance.preco_custo
-                novo_total_varejo = nova_quantidade * instance.preco_varejo
-                
-            # # Devolvendo a quantidade  registrada(errada) de saida do produto
+            unidade=unid, produto=produt_inicio)           
+
+            #Condição para acrescentar ou diminuir a quantidade no estoque.
+            result = int(quant_inicio) - int(quant_editada)
+            # Critério para adicionar ou subtrair da quantidade.
+            if result < 0:
+                new_quant = int(instance.quantidade) + result # "+" para troca de sinais 
+
             else:
-                                                       
-                # os novos valores dos campos a serem atualizados
-                nova_quantidade = instance.quantidade + int( quant_form )        
-                novo_total_custo = nova_quantidade * instance.preco_custo
-                novo_total_varejo = nova_quantidade * instance.preco_varejo
-                
-                print('instance.quantidade:',instance.quantidade,'quant_form:',int( quant_form ),"nova_quantidade:",nova_quantidade  )
-                    
+               
+                new_quant = instance.quantidade + result
+            
+            # Definindo os dados.           
+            novo_total_custo = int(new_quant) * int(instance.preco_custo)            
+            novo_total_varejo = int(new_quant) * int(instance.preco_varejo)
+                   
             # Realizando a atualização com os novos valores.
             atualizando_estoque = EstoqueModel.objects.filter(usuario=user,unidade=unid,
-            produto=produt).update(quantidade=nova_quantidade,
+            produto=produt_inicio).update(quantidade=new_quant,
             total_varejo=novo_total_varejo , total_custo=novo_total_custo)
 
-         
+        # Atualizando mais de um produto no estoque.     
+        else:
+             # lista de campos que irá definir a instâcia à atualização.
+            lista_produto = [produt_final, produt_inicio]
+
+            for produt in lista_produto:
+
+                
+                # Indentificando a instância a ser atualizada.
+                instance = EstoqueModel.objects.get(usuario=user,
+                unidade=unid, produto=produt)
+                    
+                # Subtraindo a quantidade do produto  de correção no estoque
+                if produt == produt_inicio:          
+                    
+                    
+                    # os novos valores dos campos a serem atualizados
+                    nova_quantidade =  instance.quantidade + int(quant_editada)
+                    novo_total_custo = int(nova_quantidade) * int(instance.preco_custo)
+                    novo_total_varejo =int( nova_quantidade) * int(instance.preco_varejo)
+                   
+                # Devolvendo a quantidade  registrada(errada) de saida do produto
+                elif produt == produt_final :                           
+
+                    # os novos valores dos campos a serem atualizados
+                    nova_quantidade = int(instance.quantidade) - int( quant_editada )       
+                    novo_total_custo = nova_quantidade * instance.preco_custo
+                    novo_total_varejo = nova_quantidade * instance.preco_varejo
+                                
+                        
+                # Realizando a atualização com os novos valores.
+                atualizando_estoque = EstoqueModel.objects.filter(usuario=user,unidade=unid,
+                produto=produt).update(quantidade=nova_quantidade,
+                total_varejo=novo_total_varejo , total_custo=novo_total_custo)
+            
+                cache.clear()
+
 
     def  subtrai_db_estoque(self, user, unid, produto_form,diferenca):       
         # user = usuario, unidade = unid
         '''  
-        O método subtrai_db_estoque atualiza a quantidade de produto no estoque em função da venda,
+        O método realiza ajustes na quantidade de produto do estoque em função da venda,
         subtraindo do estoque a diferença indacada na atualização.
         '''           
                 
         instance = EstoqueModel.objects.get(usuario=user, unidade=unid,produto=produto_form)#instância a ser atualizada
 
         # os novos valores dos campos a serem atualizados
-        nova_quantidade = instance.quantidade + int(diferenca)# o sinal "+" - diferença sempre negativa
+        nova_quantidade = int(instance.quantidade) + int(diferenca)# o sinal "+" - diferença sempre negativa
         novo_total_custo = nova_quantidade * instance.preco_custo
-        novo_total_varejo = nova_quantidade * instance.preco_varejo
-        
+        novo_total_varejo = nova_quantidade * instance.preco_varejo       
+     
         # Realizando a atualização com os novos valores.
         atualizando_estoque = EstoqueModel.objects.filter(usuario=user, unidade=unid,
         produto=produto_form).update(quantidade=nova_quantidade,
         total_varejo=novo_total_varejo , total_custo=novo_total_custo)
 
-
-    
+               
     def acresce_db_estoque(self,user, unid, produto_form, form_quantidade):
        #user = usuario , unid = unidade
        
-        ''' O método "acresce_db_estoque" realiza a atualização no estoque acrescentando-lhe a quantidade
-        que lhe foi subtraido na venda. A idéia é corrigir a quantidade do produto que foi retirado do estoque
-        erroneamente.
-        '''       
-       
+        ''' O método realiza ajustes no estoque adicionado a quantidade 
+        que lhe foi subtraido na venda. Aqui ocorrem correções nos registros 
+        de de saidas que foram acometidos erroneamente.
+        '''              
         #instância a ser atualizada    
         instance = EstoqueModel.objects.get(usuario=user,
         unidade=unid,produto=produto_form)
@@ -205,9 +247,46 @@ class EstoqueModel(models.Model):
         total_varejo=novo_total_varejo , total_custo=novo_total_custo)
        
 
+    def percent_lucro(self, user,unid):
+        """
+        O método calcular a margem de lucro total do estoque.
+        Args:
+            user - ususario, 
+            unid - unidade
+        
+        Return: 
+            porcentagem de lucro  total do estoque.
+          
+            """
+        
+        instance = EstoqueModel.objects.filter(usuario=user, unidade=unid)
+        
+
+        lista_lucro = []
+        lista_custo = []
+        total_varejo = 0
+        for produto in list(instance):
+            
+
+            varejo = produto.total_varejo
+            custo = produto.total_custo
+            lucro = varejo - custo
+
+            lista_lucro.append(lucro)
+            lista_custo.append(custo)
+            
+        total_custo = sum(lista_custo)
+        total_lucro = sum(lista_lucro)       
+
+        
+        porcento_lucro = float(total_lucro*100 /total_custo)
+
+        
+        return np.around(porcento_lucro, decimals=2), total_lucro
+    
+
     def __str__(self):
         return self.produto
-
 
 
 class DebitoModel(models.Model):
@@ -225,13 +304,12 @@ class DebitoModel(models.Model):
     def atualiza_db_debito(self,unid,user,produto_form,data_form,quantidade_form,aluno_form):
        
         '''
-        O método "atualiza" realizar as atualizações 
-        nos campo "quantidade" e "valor_total" do modelo.
-        '''
-        
+        O método realizar as atualizações  nos campo "quantidade" 
+        e "valor_total" do modelo.
+        '''        
         existe_registro = DebitoModel.objects.filter(usuario=user,unidade=unid,aluno=aluno_form,
         produto=produto_form, data=data_form).exists()
-        
+
         if existe_registro:
             registro_debito = DebitoModel.objects.get(usuario=user, unidade=unid, 
             aluno=aluno_form, data=data_form, produto=produto_form)
@@ -241,32 +319,26 @@ class DebitoModel(models.Model):
             aluno=aluno_form, produto=produto_form, data=data_form).update(
             quantidade=nova_quantidade,valor_total=novo_valor_total)  
 
-    def gerador_de_codigo(self):
-        '''Esta método utiliza o utimo id gerado no próprio modelo, DebitoModel, com 
-         um dos elementos para construir números sequências.
+    # def gerador_de_codigo(self):
+    #     '''Esta método utiliza o utimo id gerado no próprio modelo, DebitoModel, com 
+    #      um dos elementos para construir números sequências.
             
-        '''
-        id_code = DebitoModel.objects.aggregate(Max('id'))['id__max']
-        if id_code == None:
-            codigo = 1 # Se a tebela não possuir registros
-            return codigo
-        codigo = id_code + 1 #--> valor para o campo código
+    #     '''
+    #     id_code = DebitoModel.objects.aggregate(Max('id'))['id__max']
+    #     if id_code == None:
+    #         codigo = 1 # Se a tebela não possuir registros
+    #         return codigo
+    #     codigo = id_code + 1 #--> valor para o campo código
 
-        return codigo
+    #     return codigo
           
-    # def save(self, *args, **kwargs):       
-        
-    #     if not self.codigo:
-    #         self.codigo = self.gerador_de_codigo() # salvando altomáticamente o código na tabela DebitoModel. 
-    #     super().save(*args, **kwargs)
-
+   
     def gerentec(self,unid,user,aluno_form,
         produto_form, quantidade_form, data_form, valor_unitario_form):
 
-        """O método gerentec estabelece o critério de que ,para a criação de registro no modelo 
-        não deverá existir registro do produto na data especificada, sendo realizado
-        somente a atualização dos campos "quantidade" e "valor_total". O método retorna um dicionário cuja 
-        a chave "sucesso" possui  boleano True.
+        """O método estabelece  critérios para a criação ou somenete 
+        a atualização do registro de débito. O método retorna um dicionário cuja 
+        a chave "sucesso" possui valor boleano.
          """
         
         cadastro_venda = DebitoModel(
@@ -293,31 +365,36 @@ class DebitoModel(models.Model):
             'sucesso':True,
         }  
         return contexto
+
+
+    
+        print(media_lucro)
+    
     
     def __str__(self):
         return self.aluno
-
 
 
 class HistoricoDebitoModel(models.Model):
-    aluno =  models.CharField(verbose_name='aluno',max_length=25)
-    produto =  models.CharField(verbose_name='produto', max_length=25)
+    usuario = models.CharField(verbose_name='Usuáiro',max_length=25,null=True, blank=True)
+    unidade = models.CharField(verbose_name='Unidade',max_length=25, null=True, blank=True)     
+    aluno =  models.CharField(verbose_name='Aluno', max_length=25)
+    produto =  models.CharField(verbose_name='Produto', max_length=25)
     valor = models.DecimalField(verbose_name='Valor',max_digits=5,decimal_places=3)
     data = models.DateField(verbose_name='Data')
-    criado_em = models.DateTimeField(verbose_name='Criado em', auto_now_add=True)    
     
     def __str__(self):
         return self.aluno
 
 
-
 class FuncionarioModel(models.Model):
+    usuario = models.CharField(verbose_name='Usuáiro',max_length=25,null=True, blank=True)
+    unidade = models.CharField(verbose_name='Unidade',max_length=25, null=True, blank=True) 
     funcionario = models.CharField(verbose_name='Funcionário',max_length=25)
     telefone = models.CharField(verbose_name='Telefone', max_length=25)
 
     def __str__(self):
         return self.funcionario
-
 
 
 class CadastrosVendaModel(models.Model):
@@ -328,20 +405,29 @@ class CadastrosVendaModel(models.Model):
     valor_unitario =models.DecimalField(verbose_name='Valor_unitário',max_digits=20,decimal_places=2) 
     valor_total = models.DecimalField(verbose_name='Valor',max_digits=20, decimal_places=2) 
     data = models.DateField(verbose_name='Data')
+    
 
-        
     def acres(self, *args, **kwargs ):
         
         """
-        O método "acres" é  usuado nas atualizações dos registros de vendas.
-        O método exclui o registro da venda(que esta sendo corrigido) 
-        e em paralelo acrescenta a mesma quantidade do registro deletado
-        a quandidade do produto apontando para a correção.  
-          
-       --> Parâmetros para o método acres:
-        usuario=user, unidade=unid, pro_corrig=produt_corrigir,
-        pro_edit=produt_edit, qut_form=quantidade_form, 
-        qut_inicil=quantidade_inicial, date=data_form, delete=True <--
+        Este método é realizar correções nos registros de venda.
+
+        Args:
+
+            user: usuário,
+            unid: unidade,
+            produt_corrigir: produto que é incicializado, no formulário, para a correção,
+            produt_edit: produto final para a correção,
+            quant_inicio: quantidade do produto incializado para correção,
+            quant_final: quantidade fornecida para correção,
+            date: data do registro
+
+            Kwargs:
+
+                unic: True -  indica que irá ter apenas um produto a ser corrigido
+
+                delete: True - indica que a quantidade do produto na correção
+                irá zerá e que o mesmo deverá ser deleteado
 
         """  
 
@@ -350,27 +436,65 @@ class CadastrosVendaModel(models.Model):
         pro_corrig = kwargs.get('pro_corrig')
         pro_edit = kwargs.get('pro_edit')
         date = kwargs.get('date')
-        quant_form = kwargs.get('qut_form')
+        quant_inicio = kwargs.get('quant_inicio')
+        quant_final = kwargs.get('qut_form')
+        unic = kwargs.get('unic')
+        update = kwargs.get('update')
 
-        # "Deletetando o registro zerado  na quantidade"
+        
+        
+
+        # "Deletetando o registro zerado na conrreção"
         if kwargs.get('delete'):
 
-            # encontrando a instância a ser deletada.
+            # encontrando a instância a ser deletada.            
+
             delete_instance = CadastrosVendaModel.objects.get(
             usuario=user, unidade=unid, produto=pro_corrig, data=date).delete()
-       
+    
             # Edite a nova quantidade para o produto corrigido:
             
                 # encontrando a instância a editar
             produto_edit = CadastrosVendaModel.objects.get(usuario= user, unidade=unid ,
             produto=pro_edit ,data=date )
-                # alterar a quantidade
-            quant_edit = produto_edit.quantidade + int(quant_form)
+
+            # Alterar a quantidade
+            quant_edit = produto_edit.quantidade + int(quant_final)
             total_valor = quant_edit * produto_edit.valor_unitario
-                # atualizando                    
+            
+            # atualizando                       
             atualizar = CadastrosVendaModel.objects.filter(usuario=user,
             unidade=unid, data=date, produto=produto_edit).update(quantidade=quant_edit,valor_total=total_valor)
         
+        elif kwargs.get('update'):
+            
+            product = CadastrosVendaModel.objects.get(usuario= user, unidade=unid,
+            produto=pro_edit ,data=date )
+            quant_edit = quant_final
+            total_valor =  int(quant_final) * Decimal(product.valor_unitario)
+
+            atualizar = CadastrosVendaModel.objects.filter(usuario=user,
+            unidade=unid, data=date, produto=pro_edit).update(quantidade=quant_edit,valor_total=total_valor) 
+        
+
+
+        elif unic:        
+            
+            # encontrando a instância a editar
+           
+
+            unic_produt = CadastrosVendaModel.objects.get(usuario= user, unidade=unid,
+            produto=pro_corrig ,data=date)
+        
+            # Ajustando o valor total.
+            new_total = int(quant_final) * int(unic_produt.valor_unitario)
+            
+            # atualizando 
+                              
+            atualizar = CadastrosVendaModel.objects.filter(usuario=user,
+            unidade=unid, data=date, produto=unic_produt).update(quantidade=quant_final,valor_total=new_total)
+        
+
         # Quando a quantidade do registro não zerar.
         else:
             list_produt = [pro_corrig, pro_edit] 
@@ -380,35 +504,37 @@ class CadastrosVendaModel(models.Model):
                 # encontrando a instância a editar
                 instance_produt = CadastrosVendaModel.objects.get(
                 usuario=user, unidade=unid, produto=produt, data=date)
-                             
+                            
                 # Produto apontado para a correção.
                 if produt == pro_corrig:
                         
-                        # alterar a quantidade
-                    quant_corrigida = instance_produt.quantidade - int(quant_form)
+                    # alterar a quantidade                    
+                    quant_corrigida = int(quant_final)
                     valor_final = quant_corrigida * instance_produt.valor_unitario
 
                 # Novo produto para atualização       
                 else:
-                     # alterar a quantidade
-                    quant_corrigida = instance_produt.quantidade + int(quant_form)
+                    dif = int(quant_inicio) - int(quant_final)
+                    
+                    quant_corrigida = instance_produt.quantidade + dif
                     valor_final = quant_corrigida * instance_produt.valor_unitario
 
-                # atualizando   
+                # atualizando 
+                
                 atualizar = CadastrosVendaModel.objects.filter(usuario=user,
                 unidade=unid, produto=produt).update(quantidade=quant_corrigida,valor_total=valor_final)
-
-
+    
+       
 
     def pesquisa_data(user,unid,data_pesquisa):
         # user = usuário, unid = unidade
-        """ O método pesquisa_data realiza uma filtragem  """
+        """ O método realiza uma filtragem em função da data."""
 
 
         query = CadastrosVendaModel.objects.filter(usuario=user,unidade=unid,
         data=data_pesquisa).values('produto', 'quantidade','valor_unitario',
         'valor_total', 'data')
-        print(f'Query: {query}')
+        
         total = CadastrosVendaModel.objects.filter(usuario=user,unidade=unid,
         data=data_pesquisa).aggregate(
             quantidade_total=Sum('quantidade'),
@@ -420,7 +546,12 @@ class CadastrosVendaModel(models.Model):
         return query, quantidade_total, valor_total
     
 
-    def pesq_venda_inter_data(data_inicio):
+    def inter_data(data_inicio):
+        """
+        O método realiza uma filtragem baseado  na data de referência, informada pelo 
+        usuário, e retorna um queryset como resultado da solicitação.
+
+        """
         data_final = datetime.now()
 
         
@@ -439,7 +570,7 @@ class CadastrosVendaModel(models.Model):
 
     def atualiza(self,user, unid, produto,data,quantidade):
         # user(usuário), unid(unidade)
-        '''O método "atualiza" realizar a definição dos valores para os campos "quantidade"
+        '''Realizar atualizações de valores para os campos "quantidade"
           e "valor_total" no modelo CadastroVendaModel.'''
         
         # Checagem de registro da venda do produto para a data especificada
@@ -447,11 +578,11 @@ class CadastrosVendaModel(models.Model):
         unidade=unid, produto=produto, data=data).exists()
        
         if existe_registro:
-            print('Entrou na condição para atualizar')
+           
             # Indentificando a instância
             registro_venda = CadastrosVendaModel.objects.get(usuario=user, unidade=unid,
-            data=data,produto=produto)
-            print( 'Parâmetros do atualize:', user, unid, produto, data, quantidade)
+            data=data,produto=produto)          
+           
 
             # acrescentamos a quantidade do produto vendito a quantidade existente no banco.
             nova_quantidade = registro_venda.quantidade + Decimal(quantidade )
@@ -464,8 +595,8 @@ class CadastrosVendaModel(models.Model):
    
     def update_venda_estoque(self,user, unid, produto,data,quantidade_form,quantidade_inicial):
        
-        ''' O método update_venda_estoque realiza as correções de saidas 
-        e entradas de produtos no estoque decorrentes de vendas ou atualizações da mesma.
+        ''' Este método realiza as correções de saidas e entradas
+        de produtos no estoque decorrentes de vendas ou atualizações da mesma.
           '''
         
         # Checagem de registro da venda do produto para a data especificada.
@@ -497,15 +628,22 @@ class CadastrosVendaModel(models.Model):
                 diferenca
                 atualize_estoque = estoque_model.subtrai_db_estoque(produto,diferenca)
     
-    import datetime
+  
 
     def gerentec(self,user,unid,produto,quantidade,data,valor_unidade):
 
-        """O método gerentec estabelece o critério de que ,para a criação de registro no modelo 
-        CadastrosVendaModel, não deverá existir registro do produto na data especificada, sendo realizado
-        somente a atualização dos campos "quantidade" e "valor_total". O método gerentec também é responsável
-        por realizar a dinâmica de atualização do estoque correlacionada a venda, o método retorna um 
-        dicionário cuja a chave "sucesso" possui valor  boleano True.
+        """ 
+        Este método estabelece o critério para salvar um "registro completo 
+        na data base de vendas ou salvar de forma parcial, neste caso,a atualização 
+        ocorrerá apenas nos campos quantidade e valor_total.
+        
+        Args:
+            user (usuário),
+            unidade = (unidade),
+            produto (produto para pesquisa)
+            quantidade(quantidade do produto)
+            data(data de venda)
+            valor_unitário(valor unitário do produto)
          """
         
         cadastro_venda = CadastrosVendaModel(          
@@ -523,7 +661,8 @@ class CadastrosVendaModel(models.Model):
             produto=produto, data=data).exists():  
             quary_set = CadastrosVendaModel()
             atualizando_db_vendas = quary_set.atualiza(user, unid,
-            produto,data, quantidade) 
+            produto,data, quantidade)
+
         else: # Se a condição acima não for sartisfeita realizamos
              #o registro completo do produto na tabela.
             cadastro_venda.save()
@@ -544,78 +683,110 @@ class CadastrosVendaModel(models.Model):
         quantidade_form,quantidade_inicial,data):
         # user = usuario , unid = unidade
         
-        """O método gerentec estabelece o critério de que ,para a criação de registro no modelo 
-        CadastrosVendaModel, não deverá existir registro do produto na data especificada, sendo realizado
-        somente a atualização dos campos "quantidade" e "valor_total". O método gerentec também é responsável
-        por realizar a dinâmica de atualização do estoque correlacionada a venda, o método retorna um 
-        dicionário cuja a chave "sucesso" possui valor  boleano True.
+        """
+        O método é responsável por relaizar atualizações nos
+        registros de vendas que ocorrem em paralelo no registro de estoque.
+        
+        Args:
+
+            user: usuário,
+            unid: unidade,
+            produt_corrigir: produto que é incicializado, no formulário, para a correção,
+            produt_edit: produto apontado no formulário para ter a quantidade corrigida,
+            quantidade_incial: quantidade inicializada do produt_corrigir,
+            data: data em que ocorreu o registro
+        
+        O método ainda retorna um dicionário cuja chave "quant_superior" tem o valor 
+        boleno True - ocorre sempre que a "quantidade incial" for inferior a final.
+
+        Os métodos responsáveis por atualizações no banco de dados de vendas e do estoque 
+        são repectivamente:
+            acress e o corrig_db_estoque.       
+       
          """
        
-        # Se editarmos o produto
-        if produt_corrigir != produt_edit:
-            # Corrigindo a tabela de vendas.
-            vendas_model = CadastrosVendaModel()
-            # atualize = vendas_model.gerentec(user,unid,produt_edit,quantidade_form,data,valor_unitario)
             
-            dif_quant = int(quantidade_inicial) - int(quantidade_form)         
+        if int(quantidade_inicial) >= int(quantidade_form):
 
-           # Quando a correção zerar a quantidade do produto na data especificada no registro de vendas.
-            if dif_quant <= 0 :
+            # Quando o produto "inicializado" difere do produto "final" na autualição.            
+            if produt_corrigir != produt_edit:
 
-                # Atualizando o banco de dados de registro de vendas.      
-                atualizar_vendas = CadastrosVendaModel().acres(usuario=user,unidade=unid,
-                pro_corrig=produt_corrigir, pro_edit=produt_edit,
-                qut_form=quantidade_form, date=data, delete=True
-                )  
-
-                # Atualizando o banco de dados do estoque: 
-                atualizar = EstoqueModel().corrige_db_estoque( user, unid, 
-                produt_corrigir, produt_edit,quantidade_form )
-
-              
-            # Quando a correção não zera a quantidade do produto na data especificada no registro de vendas. 
-            else:
+                # Corrigindo a tabela de vendas.
+                vendas_model = CadastrosVendaModel()                
                 
-            # Atualizando registro de vendas.
-                atualiza_vendas = CadastrosVendaModel().acres(
-                usuario=user,unidade=unid, pro_corrig=produt_corrigir,
-                pro_edit=produt_edit, qut_form=quantidade_form, date=data
-                )                
-            # Atualizando os registros no estoque.
+                dif_quant = int(quantidade_inicial) - int(quantidade_form)         
 
-                atualiza_estoque = EstoqueModel().corrige_db_estoque( user, unid, 
-                produt_corrigir, produt_edit,quantidade_form )
+                # Quando a correção zerar a quantidade do produto na data especificada no registro de vendas.
+                if dif_quant <= 0 :
+
+                    # Atualizando o banco de dados de registro de vendas.      
+                    # atualizar_vendas = CadastrosVendaModel().acres(usuario=user,unidade=unid,
+                    # pro_corrig=produt_corrigir, pro_edit=produt_edit,quant_inicio=quantidade_inicial,
+                    # qut_form=quantidade_form, date=data, delete=True
+                    # )  
+
+                    atualizar_vendas = CadastrosVendaModel().acres(usuario=user,unidade=unid,
+                    pro_corrig=produt_corrigir, pro_edit=produt_edit, date=data, update=True
+                    )  
+                    
+                    # Atualizando o banco de dados do estoque: 
+                    atualizar = EstoqueModel().corrig_db_estoque( usuario=user,unidade=unid, 
+                    produt_inicial=produt_corrigir, produt_final=produt_edit,quant_editada=quantidade_form )
+            
+                # Quando a correção não zera a quantidade do produto na data especificada no registro de vendas. 
+                else:
+
+                # Atualizando registro de vendas.
+                    atualiza_vendas = CadastrosVendaModel().acres(
+                    usuario=user,unidade=unid, pro_corrig=produt_corrigir,
+                    pro_edit=produt_edit, qut_form=quantidade_form,quant_inicio=quantidade_inicial, date=data
+                    )             
+
+                    # Atualizando os registros no estoque.
+                    atualiza_estoque =  EstoqueModel().corrig_db_estoque( usuario=user,unidade=unid, 
+                    produt_inicial=produt_corrigir, produt_final=produt_edit,quant_editada=quantidade_form )
+            else:
+                # Atualizando o registro no cadastro de venda. 
+                vendas_model = CadastrosVendaModel().acres(
+                usuario=user,unidade=unid, pro_edit=produt_edit, 
+                qut_form=quantidade_form,quant_inicio=quantidade_inicial,
+                date=data, update=True
+                )             
+            # Atualizando o registro no cadastro de estoque.  
+                atualiza_estoque = EstoqueModel().corrig_db_estoque( usuario=user,unidade=unid, 
+                produt_inicial=produt_corrigir,quant_editada=quantidade_form,
+                quant_inicio=quantidade_inicial ,unic=True )
+
+        # Atualização apenas para um único produto.
+        elif produt_corrigir == produt_edit:           
            
-           
-        #Somente será autulaizado  a quatidade
-        else:
-            # Atualizando a quantidade do produto no "db vendas" e no "db estoque" 
-            vendas_model = CadastrosVendaModel()          
-            atualize = vendas_model.update_venda_estoque(user, unid, produt_corrigir,
-            data, quantidade_form, quantidade_inicial)        
-      
-        contexto = {
-            'sucesso':True,
-        }  
+            # Atualizando o registro no cadastro de venda. 
+            vendas_model = CadastrosVendaModel().acres(
+                usuario=user,unidade=unid, pro_edit=produt_edit, 
+                qut_form=quantidade_form,quant_inicio=quantidade_inicial,
+                date=data, update=True
+                )             
+            # Atualizando o registro no cadastro de estoque.  
+            atualiza_estoque = EstoqueModel().corrig_db_estoque( usuario=user,unidade=unid, 
+                produt_inicial=produt_corrigir,quant_editada=quantidade_form,
+                quant_inicio=quantidade_inicial ,unic=True )
+            
+        # "Exceção - quantidade incial inferior a final."
+        elif int(quantidade_inicial) < int(quantidade_form):
+        
+            
+            contexto = {
+                'quant_superior': True
+                  } 
 
-
+            return  list(contexto.keys())[0]
+        
+        
+       
         
     def __str__(self):
         return self.produto
    
-
-
-class TesteEstoqueModel(models.Model):
-    usuario = models.CharField(verbose_name='Usuário',max_length=25, )
-    unidade = models.CharField(verbose_name='Unidade', max_length=25,null=True,default='s/dados')
-    produto = models.CharField(verbose_name='Produto',max_length=25)
-    quantidade = models.CharField(verbose_name='Quantidade',max_length=25)
-    valor = models.IntegerField(verbose_name='Valor')
-
-    def __etr_(self):
-        return self.usuario
-
-
 
 class UsuariosModel(models.Model):
     username = models.CharField(verbose_name='Username', max_length=25)
@@ -623,7 +794,6 @@ class UsuariosModel(models.Model):
 
     def __str__(self):
         return self.username
-
 
 
 class UnidModel(models.Model):
@@ -636,3 +806,15 @@ class UnidModel(models.Model):
     def __str__(self):
         return self.unidade
     
+
+class ModelAluno(models.Model):
+   
+    usuario = models.CharField(verbose_name='Usuáiro',max_length=25)
+    unidade = models.CharField(verbose_name='Unidade',max_length=25) 
+    nome = models.CharField(verbose_name='Nome',max_length=25)
+    turma = models.CharField(verbose_name='Turma',max_length=20,)
+    responsavel = models.CharField( verbose_name='Responsavel',max_length=25)
+    tel_responsavel = models.CharField(verbose_name='Contato do responsável',max_length=25)
+
+    def __str__(self):
+        return self.nome   

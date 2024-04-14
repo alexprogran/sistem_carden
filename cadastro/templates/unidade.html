@@ -1,26 +1,86 @@
 {% extends "carden.html" %}
 {% load bootstrap5 %}
 
+    <!-- ESTA PÁGINA ESTA RELACIONADA COM A "NAVEGAÇÃO" DE UNIDADES. -->
 {% block conteudo %}
-<div class="col-md-4">   
-    <p>Olá {{usuario}}</p>
+
+       <!-- Caso o usuário não tenha cadastrado uma unidade -->
+{% if unidade_zerada %}
+<div class="container">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-4 text-center">                
+            <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Informe unidade</em></strong></h2>
+            </div>  
+        </div>
+    </div><br><br><br><br>
+
+    <div class="row justify-content-center">   
+        <div class="col-md-4">
+            <p class="alert alert-warning">
+                *Olá {{usuario|upper}} é necessário cadastrar uma unidade. Para isso, clique no botão
+                "Criar Unidade".
+            </p>
+        </div>
+    </div><br> 
     
-    <h1>Informe a unidade.<br><br></h1>  
     
-    <form action="" method="post" >            
-        {% csrf_token %}
-        {% bootstrap_form unid_form %}
+    <div class="row justify-content-center">
         
+        <div class="col-md-4">
+            <!-- Fomulário para indentificação da unidade -->
+            <form action="" method="post" >            
+                {% csrf_token %}
+                {% bootstrap_form unid_form %}
 
-        <button class="btn btn-primary" type="submit">Confirma</button><br><br>
-        <p style="margin-bottom: 0px;">*Se não possui unidade, cadastre uma.</p>
-        <p>*Selecione o botão abixo "Criar Unidade"</p>             
-        <a href="{% url 'cadastro:cadast-unid'%}" class="btn btn-primary" role="button" style="width: 300px">Criar Unidade</a><br><br>
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 300px">Home</a><br><br>
+                <button class="btn btn-primary" type="submit" role="button" style="width: 448px">Confirma</button><br><br>
+                <a href="{% url 'cadastro:cadast-unid'%}" class="btn btn-primary" role="button" style="width: 448px">Criar Unidade</a><br><br>
+                <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 448px">Home</a><br><br>
+            </form>
+        </div>    
+    </div>
 
-    </form>
-   
-    
 
-</div>
+
+{% else %}
+
+ 
+<div class="container mt-4">
+    <div class="row justify-content-center align-items-center mt-4">
+        
+        <div class="col-md-4 text-center mb-4">
+                         
+            <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                <h2 class="m-0" style="font-family: 'Oswald', sans-serif;"><strong><em>Informe Unidade</em></strong></h2>
+            </div>  
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-4 mt-4">
+            <form action="" method="post">            
+                {% csrf_token %}
+                {% bootstrap_form unid_form %}
+                <button class="btn btn-primary"role="button" style="width: 448px; border-radius: 10px;" type="submit">Confirma</button><br>
+                <a href="{% url 'cadastro:cadast-unid'%}" class="btn btn-primary mt-3" role="button" style="width:448px; border-radius: 10px;">Criar Unidade</a>
+                <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary mt-3" role="button" style="width: 448px; border-radius: 10px;">Home</a>
+            </form>
+        </div>
+    </div><br><br><br><br><br><br>
+
+
+    <div class="row justify-content-center align-items-center mt-4">
+        <div class="col-md-4 text-center" style="font-size: 20px;">  
+                <p>Sistem Carden</p>
+        </div>
+            
+    </div>
+
+</div>      
+
+
+
+
+{% endif %}
+
 {% endblock %}

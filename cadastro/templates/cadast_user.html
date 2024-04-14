@@ -1,31 +1,84 @@
 {% extends "carden.html" %}
 {% load bootstrap5 %}
 
+
+<!-- TEMPLATE RELACIONDA COM O CADASTRO DO USUÁRIO -->
+
 {% block conteudo %}
-<div class="col-md-6"> 
+
+
     {% if sucesso %}
-        <p class="alert alert-success">Usuário cadastrado com sucesso</p><br><br>       
-        <a href="{% url 'cadastro:login'%}" class="btn btn-primary" role="button" style="width: 300px">Realize o login</a>
-           
-    
-    
-    {% else %}
 
-    <h1>Cadastre um novo usuário<br><br></h1>
+    
+    <div class="container">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-md-4 text-center">                
+                <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                    <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Login</em></strong></h2>
+                </div>  
+            </div>
+        </div><br><br><br><br>
+    
+        <div class="row justify-content-center">
+            <div class="col-md-4" style="font-family: 'Open Sans', sans-serif;"> 
+                <p class="alert alert-success">
+                    *Pronto, falta pouco para cadastrar os seus clientes,
+                    vendas, estoque, débitos e utilizar todos os demais recursos
+                    do conjunto de gerenciadores
+                    do  Sistem Carden, agora realize o login abaixo.
+                </p>
+            </div> 
+        </div><br>
+    
+        <div class="row justify-content-center">
+            <div class="col-md-4"> 
+                <form action="" method="post">                                
+                    {% csrf_token %}
+                    <!-- Campo oculto para a indentificação do formulário na vew -->
+                    <input type="hidden" name="form_type" value="form_login">
+                    {% bootstrap_form formulario_login %}
+    
+                    <button class="btn btn-primary" type="submit" role="button" style="width: 200px">Confirmar</button>       
+                    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 200px">Home</a>  
+                </form>            
+            </div>
+        </div>
+    </div>   
+     
+    {% else %} 
+    
+    <div class="container">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-md-4 mx-auto text-center">           
+                <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                    <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Cadastre-se</em></strong></h2>
+                </div>  
+              </div>        
+        </div><br><br>
     
 
+     <div class="row justify-content-center">
+        <div class="col-md-4" style="font-family: 'Open Sans', sans-serif;">
+    
+            
 
-    <form action="" method="post" >            
-        {% csrf_token %}
-        {% bootstrap_form form_login %}
+                <form action="" method="post" >            
+                    {% csrf_token %}
+                    
+                    <!-- Campo oculto para a indentificação do formulário na vew -->
+                    <input type="hidden" name="form_type" value="form_cadast_user">
+
+                    {% bootstrap_form form_cadast_user %}
         
         
 
-        <button class="btn btn-primary" type="submit">Cadastrar</button>       
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>  
-    </form>
-   
-    {% endif %}
+                <button class="btn btn-primary" type="submit" role="button" style="width: 200px">Cadastrar</button>       
+                <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 200px">Home</a>  
+            </form>
+            
+        </div>
+    </div> 
 
-</div>
+    {% endif %}     
+    
 {% endblock %}

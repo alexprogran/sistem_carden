@@ -1,48 +1,76 @@
 {% extends "carden.html" %}
 {% load bootstrap5 %}
 
-<!--  *PÁGINA RELACIONADA COM ATUALIZAÇÕES NO CADASTRO DO ALUNO -->
+<!--  *A TEMPLATE ESTA RELACIONADA COM ATUALIZAÇÕES DOS ALUNOS. -->
 
 {% block conteudo %}
-<div class="col-md-6"> 
-    {% if sucesso %}
-        <!-- Informes de sucesso da atualização -->
-        <p class="alert alert-success">Atualização realizada com sucesso</p>
-        <a href="{% url 'cadastro:update-aluno'%}" class="btn btn-primary">Realizar um nova atualização</a>
-        <a href="{% url 'cadastro:pesquisa-aluno'%}" class="btn btn-primary">Lita de alunos</a>
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>    
+    {% if sucesso %}    
+    <div class="row justify-content-center align-items-center mx-auto col-ms-6 col-md-4"style="margin-top: 20px;" >
+        <p class="alert alert-success text-center">Atualização realizada com sucesso.</p>
+        <div class="mb-2 mx-auto" style="margin-top: 50px;">
+            <a href="{% url 'cadastro:update-aluno'%}" class="btn btn-primary " role="button" style="width: 430px; border-radius: 10px;">Novo Atualização</a>
+        </div>
+        <div class="mb-2">
+            <a href="{% url 'cadastro:lista-aluno'%}" class="btn btn-primary" role="button" style="width:430px; border-radius: 10px;">Alunos</a>
+        </div>
+        <div class="mb-2">
+            <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary"  role="button" style="width: 430px; border-radius: 10px;">Home</a>
+        </div>       
+        <!-- Rodapé -->
+        <div class="container">
+            <div class="row justify-content-center align-items-center mt-4">
+                <div class=" col-ms-4 col-md-5 text-center" style="font-size: 20px;margin-top: 80px;">  
+                        <p>Sistem Carden</p>
+                </div>
+                    
+            </div>
+        </div>
     
     
-    {% elif pesquisa_aluno %}
-    <p>Olá {{usuario}}</p>
-    <h1>Infome o aluno para atualização.<br><br></h1>
-    <!-- Formulário de pesquisa -->
-    <form action="" method="post" >            
-        {% csrf_token %}
-        {% bootstrap_form pesquisa_form %}   
-        
-
-        <button class="btn btn-primary" type="submit">Pesquisar</button>
-        <a href="{% url 'cadastro:pesquisa-aluno'%}" class="btn btn-primary">Cancelar</a>
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>  
-    </form>
-
-
-    {% elif form_dados %}
-    <p>Olá {{usuario}}</p>
-    <h1>Realize a tualização<br><br></h1>
-    <!-- Formulário populado a ser atualizado -->
-    <form action="" method="post" >            
-        {% csrf_token %}
-        {% bootstrap_form form_preenchido %}       
-        
-
-        <button class="btn btn-primary" type="submit">Atualizar</button>       
-        <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary">Estoque</a>
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>  
-    </form>
-
-    {% endif %}
-
-</div>
+    {% elif pesquisa %}        
+    <div class="container">
+        <div class="row justify-content-center align-items-center mt-5">
+            <div class="col-md-4 mx-auto text-center">
+                <p>*Olá {{ user|upper }}, unidade de acesso - {{unidade|upper}}</p>
+                <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                    <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Aluno a atualizar</em></strong></h2>
+                </div>
+            </div>
+        </div>
+    </div><br><br><br><br>
+                           
+    <div class="col-ms-4 col-md-4 mx-auto mt-4">            
+        <!-- Formulário de pesquisa -->
+        <form action="" method="post" >            
+            {% csrf_token %}
+            {% bootstrap_form form_pesquisa %}
+            <button class="btn btn-primary" role="button"  style="width: 448px; border-radius: 10px;" type="submit">Pesquisar</button>
+            <a href="{% url 'cadastro:lista-aluno'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px; margin-top: 10px;">Alunos</a>
+            <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary"role="button"  style="width: 448px; border-radius: 10px; margin-top: 10px;">Home</a>  
+        </form> 
+    </div>         
+    
+    {% elif instanciado %}
+    <div class="container">
+        <div class="row justify-content-center align-items-center" style="margin-top: -60px;">
+            <div class="col-md-4 mx-auto text-center">
+                <p>*Olá {{ user|upper }}, unidade de acesso - {{unidade|upper}}</p>
+                <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                    <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Atualizar Dados</em></strong></h2>
+                </div>  
+            </div>
+        </div>        
+    </div>
+    <div class="col-ms-4 col-md-4 mx-auto mt-4" style="margin-top: -60px;">                      
+        <!-- Formulário populado a ser atualizado -->
+        <form action="" method="post" >                     
+            {% csrf_token %}
+            <input type="hidden" name="type_form" value="form_preenchido">
+            {% bootstrap_form form_preenchido %}
+            <button class="btn btn-primary" type="submit" role="button"   style="width: 448px; border-radius: 10px;">Corrigir</button>       
+            <a href="{% url 'cadastro:lista-aluno'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px; margin-top: 10px;">Cancelar</a>
+            <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button"  style="width: 448px; border-radius: 10px; margin-top: 10px;">Home</a>  
+        </form>
+    </div>
+{% endif %}
 {% endblock %}
