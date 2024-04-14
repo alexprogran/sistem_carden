@@ -1,0 +1,60 @@
+{% extends "carden.html" %}
+{% load bootstrap5 %}
+
+<!-- PÁGINA RELACIONADA A EXCLUSÃO DO ALUNO -->
+
+{% block conteudo %}
+
+   
+    {% if sucesso %}
+    <div class="container text-left">        
+            <!-- Informes de sucesso de atualizações. -->
+            <p class="alert alert-success">Aluno excluído com sucesso.</p>
+            <a href="{% url 'cadastro:delete-produto'%}" class="btn btn-primary" role="button" style="width: 200px">Outra exclusão</a>
+            <a href="{% url 'cadastro:lista-aluno'%}" class="btn btn-primary" role="button" style="width: 200px">Ir para aluno</a>
+            <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary" role="button" style="width: 200px">Home</a>  
+        </div>
+    {% elif pesquisa_aluno %}
+    <div class="row justify-content-center align-items-center">
+        <div class="container">
+
+            <div class="col-md-4 mb-5 mx-auto text-center">
+                <p>*Olá {{ user|upper }}, unidade de acesso - {{unidade|upper}}</p>
+                <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                    <h2 class="text-center" style="font-family: 'Oswald', sans-serif;"><strong><em>Excluir aluno</em></strong></h2>
+                </div>  
+            </div>
+             
+        </div><br><br><br><br><br><br>
+
+        <!-- Formulário de pesquisa -->
+        <div class="row col-md-5">
+            
+            <form action="" method="post">            
+                {% csrf_token %}
+                {% bootstrap_form pesquisa_form %}
+                <div class="row justify-content-center align-items-center">
+
+                    <button class="btn btn-primary m-2" type="submit" role="button" style="width: 200px; border-radius: 10px">Pesquisar</button>
+                    <a href="{% url 'cadastro:lista-aluno'%}" class="btn btn-primary" role="button" style="width: 200px; border-radius: 10px">Cancelar</a>
+                
+                </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
+        <p>Olá {{usuario}}</p>
+        <h1>Registro a deletar - {{unidade}}<br><br></h1>
+        
+        <!-- Formulário populado a ser atualizado -->
+        <div class="text-center">
+            <form action="" method="post">            
+                {% csrf_token %}
+                {% bootstrap_form form_aluno %}
+                <button class="btn btn-primary" type="submit" role="button" style="width: 200px">Excluir</button>       
+                <a href="{% url 'cadastro:lista-aluno'%}" class="btn btn-primary" role="button" style="width: 200px">Cancelar</a>
+                <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 200px">Home</a>  
+            </form>
+        </div>
+    {% endif %}
+{% endblock %}

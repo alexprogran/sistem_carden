@@ -2,56 +2,76 @@
 {% load bootstrap5 %}
 
 {% block conteudo %}
-
-
-{% if sucesso %}
-    <div class="col-md-6">
-        <p class="alert alert-success"> Produto cadastrado com sucesso</p>
-        <a href="{% url 'cadastro:cadast-estoque-produto'%}" class="btn btn-primary" role="button" style="width: 200px">Novo cadastro</a>
-        <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary" role="button" style="width: 200px">Ir para estoque</a>
-        <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary"  role="button" style="width: 200px">Home cadastro</a>    
-    </div>
-
-<div class="col-md-12">    
-    
-    {% else %} 
-    <style>
-        .extra-bold {
-            font-weight: 500;
-        }
-    </style>
-
-    <div class="container ">
-        <div class="row  extra-bold">
-            <div class="col-md-3">
-                <p class="text-light">Olá {{usuario}}</p>
+<!-- TAMPLETE RELACIONADA COM O CADASTRO DE PRODUTO NO ESTOQUE. -->  
+<div class="container">
+    <div class="row">   
+        
+        {% if sucesso %}
+        <div class="row justify-content-center align-items-center mx-auto col-ms-6 col-md-4"style="margin-top: 20px;" >
+            <p class="alert alert-success text-center">Produto cadastrado com sucesso</p>
+            <div class="mb-2 mx-auto">
+                <a href="{% url 'cadastro:cadast-estoque-produto'%}" class="btn btn-primary " role="button" style="width: 430px; border-radius: 10px;">Novo cadastro</a>
             </div>
-          <div>            
-    </div>
-    
-</div>
-    <h2>Cadastre produto - {{unidade}} <br><br></h2>  
-    <div class="container">      
-        <div class="row">
-            <div class="col-md-6">
+            <div class="mb-2">
+                <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary" role="button" style="width:430px; border-radius: 10px;">Ir para estoque</a>
+            </div>
+            <div class="mb-2">
+                <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary"  role="button" style="width: 430px; border-radius: 10px;">Home cadastro</a>
+            </div>    
+        </div>
+        
+        {% elif categoria_zerada %}
+        
+        <div class="col-ms-3 col-md-3" style="margin-left: 120px;">
+            <p class="alert alert-warning">
+                *Olá {{usuario|upper}}, para registro de produtos cadastre suas categorias.                
+                Para isso click em -> Home -> Cadastramentos -> Categoria                        
+            </p>
+        </div>            
+                    
+        <div class="col-ms-6 col-md-4"  style="margin-left: 50px;">
+            <div class="list-group text-center" style="background-color: white; color: black; border-radius: 10px;">
+                <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Cadastro De Produtos</em></strong></h2>
+            </div><br><br>                   
+            <div>  
                 <form action="" method="post">  
                     {% csrf_token %}
                     {% bootstrap_form estoque_form %}
-                    <button class="btn btn-primary" type="submit" role="button" style="width: 200px">Cadastrar</button>
-                    <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary" role="button" style="width: 200px">Estoque</a>
-                    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 200px">Home</a>  
+                    <button class="btn btn-primary" type="submit" role="button" style="width: 145px; border-radius: 10px;">Cadastrar</button>
+                    <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary" role="button" style="width: 145px; border-radius: 10px;">Estoque</a>
+                    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 145px; border-radius: 10px;">Home</a>  
                 </form>
             </div>
-            <div class="col-md-6 text-right">
-                <p>*Para o primeiro cadastro de produto registre uma categoria.</p>
+               
+            
+        </div>       
+            
+        {% else %} 
+        <div class="row justify-content-center align-items-center mx-auto" style="position: relative; top: -30px;">
+            <div class=" col-ms-6 col-md-4 mx-auto text-center">
+                <p>*Olá {{ user|upper }}, unidade de acesso - {{unidade|upper}}</p>
+                <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                    <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Cadastro De Produto</em></strong></h2>
+                </div>
             </div>
-        </div>   
-    </div>
-     
+        </div><br><br>        
+
+        <div class=" col-ms-6 col-md-4 mx-auto" style="position: relative; top: -30px;">
+            <form action="" method="post">  
+                {% csrf_token %}
+                {% bootstrap_form estoque_form %}
+                <button class="btn btn-primary" type="submit" role="button" style="width: 140px; border-radius: 10px;">Cadastrar</button>
+                <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary" role="button" style="width: 140px; border-radius: 10px;">Estoque</a>
+                <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 140px; border-radius: 10px;">Home</a>  
+            </form>
+        </div>     
         
     </div>
-    
-    {% endif %}
+   
+</div>           
+        
+            
+            {% endif %}
 
-</div>
+      
 {% endblock %}

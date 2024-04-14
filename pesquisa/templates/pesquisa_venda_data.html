@@ -1,70 +1,109 @@
 {% extends "carden.html" %}
 {% load bootstrap5 %}
 
+<!-- A TEMPLATE ESTA RELACIONADA COM A PESQUISA DA VENDA EM FUNÇÃO DA DATA. -->
+
 {% block conteudo %}
-<div class="col-md-10"> 
-    {% if pesquisa %}
-    <p>Olá {{usuario}}</p>
-    <div class="list-group">
-        <h1>Resultado - {{unidade}}.</h1>
-             <div class="container mt-5">
-                   <table class="table  text-light">
-                     <thead>
-                       <tr>
-                         <th scope="col">Produto</th>
-                         <th scope="col">Valor unitario</th>                      
-                         <th scope="col">Qunatindade</th>
-                         <th scope="col">Valor total</th>
-                         <th scope="col">Data</th>              
-                       </tr>
-                     </thead>
-                      
-                     <tbody>
-                       {% for pesquisa in query_pesquisa %}
-                       <tr>
-                           
-                         <td> {{pesquisa.produto}}</td>                   
-                         <td> {{ pesquisa.valor_unitario }}</td>
-                         <td> {{ pesquisa.quantidade}}</td>
-                         <td> {{ pesquisa.valor_total}}</td>
-                         <td> {{ pesquisa.data|date:"d-m-Y"}}</td>
-                       </tr>   
-                     </tbody>             
-                       {% endfor %}
+
+
+  {% if pesquisa %}
+
+  <div class="container">  
+    <div class="row">
+  
+      <p class="text-light" style="margin-left: 25px;">*Olá: {{user|upper}}, acessando unidade {{unidade|upper}}.</p>
+      <div class=" col-ms-4 col-md-4">
+        <div class="list-group " style="background-color: white; color: black; display: flex; justify-content: center; align-items: center; height: 40px; border-radius: 10px;margin-top:10px;margin-left: 25px;">
+          <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Resultado De Pesquisa</em></strong></h2>
+        </div>
+      </div>
+      <div class="col-ms-4 col-md-10 "> 
+
+          <div class="container mt-5">
+            <table class="table  text-light">
+              <thead>
+                <tr>
+                  <th scope="col">Produto</th>
+                  <th scope="col">Valor unitario</th>                      
+                  <th scope="col">Quantidade</th>
+                  <th scope="col">Valor total</th>
+                  <th scope="col">Data</th>              
+                </tr>
+              </thead>
+              <tbody>
+                {% for pesquisa in page_obj %}
+                <tr>
+                  <td>{{ pesquisa.produto }}</td>                   
+                  <td>{{ pesquisa.valor_unitario }}</td>
+                  <td>{{ pesquisa.quantidade }}</td>
+                  <td>{{ pesquisa.valor_total }}</td>
+                  <td>{{ pesquisa.data|date:"d-m-Y" }}</td>
+                </tr>   
+                {% endfor %}
+              </tbody>             
+            </table>
+          </div>   
+        </div>
+      </div> 
+      <div class="container" style="display: flex; font-size: 18px;margin-right: 20px; font-weight: bold;">
+        <p class="paragrafo" style="margin-left: 300px;">Total de vendas: {{ valor_total }}</p>
+        <p class="outro-texto" style="margin-left: 40px;">Quantidade de produtos vendidos: {{ quantidade_total }}</p>
+      </div>
+
+      <div class="col-md-6" style="margin-top: 10px;">
+        <a href="{% url 'cadastro:pesquisa-venda-data'%}" class="btn btn-primary" role="button" style="width: 200px">Nova pesquisa</a>  
+        <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button" style="width: 200px">Vendas</a>
+      </div> 
+  
+    </div>  
+
+    <div class=" col-ms-4 col-md-12 " style="margin-top: 10px;">
+      {% if page_obj.has_previous %}
+
+      <a href="?page=1" class="btn btn-primary" role="button" style="width: 200px; border-radius: 10px;">Primeira</a>
+      <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-primary" role="button" style="width: 200px; border-radius: 10px;">Anterior</a>
+      {% endif %}
+
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" class="btn btn-primary" role="button" style="width: 200px; border-radius: 10px;">Próxima</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-primary" role="button" style="width: 200px; border-radius: 10px;">Última</a>
+      {% endif %}
+    </div>
+    
       
-                   </table>
-               </div>
-                 
-               <div class="container" style="display: flex; font-size: 18px;margin-right: 20px; font-weight: bold;" >
-                 <p class="paragrafo"  style="margin-left: 300px;">Total de vendas: {{valor_total}}</p>
-                 <p class="outro-texto"  style="margin-left: 40px;" >Quantidades de produtos vendidos: {{quantidade_total}}</p>
-                             
-             </div>
-             <div class="col-md-6">
-                <a href="{% url 'cadastro:pesquisa-venda-data'%}" class="btn btn-primary" role="button" style="width: 200px">Nova pesquisa</a>  
-                <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button" style="width: 200px">Vendas</a>
+  </div> 
+</div> 
+<!-- PESQUISA DE VENDA POR DATA -->
+{% else %}
+<div class="container">
+  <div class="row justify-content-center align-items-center">
+    <div class="col-ms-4 col-md-4  mx-auto text-center">
+      <p>*Olá {{ user|upper }}, informe uma data para pesquisa.</p>
+      <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+        <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Pesquisar Venda</em></strong></h2>
+      </div>
+    </div>
+  </div>
 
-                </div> 
-          
-       </div>
-               
-     </div>
-    {% else %}
-    <p>Olá {{usuario}}</p>
-    <h1><br><br>Venda por data - {{unidade}}</h1>
-    <div class="col-md-6">
-      <form action="" method="post" >            
-          {% csrf_token %}
-          {% bootstrap_form pesquisa_form %}
-          
-          
+  <div class="row justify-content-center align-items-center">
+    <div class="col-ms-4 col-md-4  mx-auto" style="margin-top: 10px;"> 
+      <form action="" method="post">
+        <!-- formulário para a pesquisa -->
+        {% csrf_token %}
+        {% bootstrap_form pesquisa_form %}
+        <button class="btn btn-primary" type="submit" role="button" style="width: 448px; border-radius: 10px">Pesquisa</button>
+        <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px;margin-top: 15px;">Cancelar</a>
 
-          <button class="btn btn-primary" type="submit" role="button" style="width: 200px">Pesquisa</button>
-          <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button" style="width: 200px">Cancelar</a>
-
-          
       </form>
     </div>
-   {% endif %}
+  </div>
+
+  
 </div>
+
+
+
+      
+
+{% endif %}
 {% endblock %}

@@ -1,65 +1,95 @@
 {% extends "carden.html" %}
 {% load bootstrap5 %}
 
-<!--  *PÁGINA RELACIONADA AS ATUALIZAÇÕES DE VENDAS -->
+<!--*PÁGINA RELACIONADA AS ATUALIZAÇÕES DE VENDAS -->
 
 {% block conteudo %}
-<div class="col-md-6"> 
+ 
     {% if sucesso %}
         <!-- Informes de sucesso da atualização -->
-        <p class="alert alert-success">Atualização realizada com sucesso</p>
-        <a href="{% url 'cadastro:update-vendas'%}" class="btn btn-primary" role="button"  style="width: 200px">Novo venda</a>
-        <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button"  style="width: 200px">Vendas</a>
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button"  style="width: 200px"">Home</a>    
+
+        <div class="row justify-content-center align-items-center mx-auto col-ms-6 col-md-4"style="margin-top: 20px;" >
+          <p class="alert alert-success text-center">Atualização realizada com sucesso</p>
+          <div class="mb-2 mx-auto" style="margin-top: 50px;">
+              <a href="{% url 'cadastro:update-vendas'%}" class="btn btn-primary " role="button" style="width: 430px; border-radius: 10px;">Nova Atualização</a>
+          </div>
+          <div class="mb-2">
+              <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button" style="width:430px; border-radius: 10px;">Vendas</a>
+          </div>
+          <div class="mb-2">
+              <a href="{% url 'cadastro:update-vendas'%}" class="btn btn-primary"  role="button" style="width: 430px; border-radius: 10px;">Home</a>
+          </div>        
     
-    <!-- Caso a pesquisa não tenha econtrado registro do produto vendido na data especificada. -->
-    {% elif registro_inexistente %}
-    <p class="alert alert-danger">Não foi encontrado registro do produto vendido na data especificada.</p>    
-    <a href="{% url 'cadastro:update-vendas'%}" class="btn btn-primary" role="button"  style="width: 200px">Tenta novamente</a>
-    <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button"  style="width: 200px">Vendas</a>
-    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button"  style="width: 200px">Home</a>
+
+{% elif quant_superior%}
+
+<div class="row justify-content-center align-items-center mx-auto col-ms-6 col-md-4"style="margin-top: 20px;" >
+  <p class="alert alert-danger text-center">Quantidade inválida, superior a existente no registro de vendas.</p>
+  <div class="mb-2 mx-auto" style="margin-top: 50px;">
+      <a href="{% url 'cadastro:update-vendas'%}" class="btn btn-primary " role="button" style="width: 430px; border-radius: 10px;">Tentar Novamente</a>
+  </div>
+  <div class="mb-2">
+      <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button" style="width:430px; border-radius: 10px;">Vendas</a>
+  </div>
+  <div class="mb-2">
+      <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary"  role="button" style="width: 430px; border-radius: 10px;">Home</a>
+  </div>        
+
+{% elif pesquisa_venda%}
     
-    {% elif quant_superior%}
-    <p class="alert alert-danger">Quantidade inválida, superior a existente no registro de vendas.</p>    
-    <a href="{% url 'cadastro:update-vendas'%}" class="btn btn-primary" role="button"  style="width: 200px">Tenta novamente</a>
-    <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button"  style="width: 200px">Vendas</a>
-    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button"  style="width: 200px">Home</a>
+<div class="container">
+  <div class="row justify-content-center align-items-center">
+    <div class="col-ms-4 col-md-4  mx-auto text-center">
+      <p>*Olá {{ user|upper }}, informe um produto e data para a pesquisa.</p>
+      <div class="list-group" style="background-color: white; color: black; border-radius: 10px; margin-bottom: 10px;">
+        <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Atualizar Produto</em></strong></h2>
+      </div>
+    </div>
+  </div>
+  <div class="row"> 
+    <div class=" col-ms-4 col-md-4 mx-auto">                        
+      <!-- Formulário de pesquisa -->
+      <form action="" method="post" >            
+          {% csrf_token %}
+          {% bootstrap_form pesquisa_form %}      
+          <div class="row mx-auto"> 
+            <button class="btn btn-primary" role="button"  style="width: 448px; border-radius: 10px;" type="submit">Pesquisar</button>
+          </div>
+          <div class="row mx-auto" style="margin-top: 10px;">
+            <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button"  style="width: 448px; border-radius: 10px;">Cancelar</a>
+          </div>
+          <div class="row mx-auto" style="margin-top: 10px;">
+            <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary"role="button"  style="width: 448px; border-radius: 10px;">Home</a>  
+          </div>
+        </form> 
+    </div>
+  </div> 
+</div>
 
-    {% elif pesquisa_venda%}
-    <div class="col-md-12"> 
-        <div class="row">
-            <p>Olá {{usuario}}</p>
-            <h1>Produto à corrigir - {{unidade}}.<br><br></h1>    
-            <!-- Formulário de pesquisa -->
-            <form action="" method="post" >            
-                {% csrf_token %}
-                {% bootstrap_form pesquisa_form %}      
+  {% else %}
+<div class="container" style="margin-top: -30px;">
+  <div class="row justify-content-center align-items-center">
+    <div class="col-ms-4 col-md-4  mx-auto text-center">
+      <p>*Olá {{ user|upper }}, edite os dados se necessário.</p>
+      <div class="list-group" style="background-color: white; color: black; border-radius: 10px; margin-bottom: 10px;">
+        <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Corigir Venda</em></strong></h2>
+      </div>
+    </div>
+  </div>
 
-                <button class="btn btn-primary" role="button"  style="width: 200px" type="submit">Pesquisar</button>
-                <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button"  style="width: 200px">Cancelar</a>
-                <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary"role="button"  style="width: 200px">Home</a>  
-            </form> 
-            
-           
-        </div>
-
-
-    {% else %}
-    <p>Olá {{usuario}}</p>
-    <h1> Corrigindo Vendas - {{unidade}}<br><br></h1>
-    <!-- Formulário populado a ser atualizado -->
-    <form action="" method="post" >            
-        {% csrf_token %}
-        {% bootstrap_form vendas_form %}
-        
-        
-
-        <button class="btn btn-primary" type="submit" role="button"  style="width: 200px">Corrigir</button>       
-        <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button"  style="width: 200px">Cancela</a>
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button"  style="width: 200px">Home</a>  
-    </form>
+  <div class="row"> 
+    <div class=" col-ms-4 col-md-4 mx-auto"> 
+      <!-- Formulário populado a ser atualizado -->
+      <form action="" method="post" >            
+          {% csrf_token %}
+          {% bootstrap_form vendas_form %}
+          <button class="btn btn-primary" type="submit" role="button"  style="width: 200px; border-radius: 10px;">Corrigir</button>       
+          <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button"  style="width: 200px; border-radius: 10px;">Cancela</a>
+      </form>
+    </div>
+  </div>
 
     {% endif %}
 
-</div>
+
 {% endblock %}

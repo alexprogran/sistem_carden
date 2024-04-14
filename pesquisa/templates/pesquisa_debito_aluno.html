@@ -1,80 +1,91 @@
 {% extends "carden.html" %}
 {% load bootstrap5 %}
 
+
+<!-- ESTA TEMPLATE ESTA RELACIONADA COM A PESQUISA DE BÉBITO DO ALUNO. -->
+
 {% block conteudo %}
+<!-- LISTA DE DÉBITO DO ALUNO -->
 
 {% if list_debito_aluno %}
-  <p>*Olá {{usuario|upper}}, este acesso é referente a unidade de {{unidade|upper}}</p>
- <div class="col-md-12">  
-    <div class="list-group">
-     <h1>Débito de {{aluno}}</h1>
-          <div class="container mt-5">
-                <table class="table text-light">
-                  <thead>
-                    <tr>
-                      <!-- <th scope="col">Nome do aluno</th> -->
-                      <th scope="col">Data</th> 
-                      <th scope="col">Quantidade</th> 
-                      <th scope="col">Produtos consumidos</th>  
-                      <th scope="col">Valor unitário</th>                                              
-                      <th scope="col">Valor total</th>                            
-                                    
-                    </tr>
-                  </thead>
-                   
-                  <tbody>
-                    {% for debito in lista_debito %}
-                    <tr>            
-                      <!-- <th scope="row">{{ debito.aluno }}</th>   -->
-                      <!-- <td> {{ debito.aluno }}</td>-->
-                      <td> {{ debito.data|date:"d-m-Y"}}</td>
-                      <td> {{ debito.quantidade}}</td>
-                      <td> {{ debito.produto }}</td>
-                      <td> {{ debito.valor_unitario}}</td>                     
-                      <td> {{ debito.valor_total}}</td>
-                      
-                    </tr>   
-                  </tbody>                
-                    {% endfor %}
-   
-                </table>
-            </div>
-              
-            <div class="container" style="display: flex; font-size: 18px;margin-right: 20px; font-weight: bold;" >
-              <p class="paragrafo"  style="margin-left: 300px;">Valor total: {{valor_total}}</p>
-              <p class="outro-texto"  style="margin-left: 40px;" >Regitros: {{quant_debito}}</p>
-                           
-            </div>
-            <!-- <p style="font-size: 18px;">Debito total: {{total_debito}}</p> -->
-           
-            
+<div class="container" >
+  <div class="col-md-4 text-center" style="margin-top: -50px;">
+    <p>*Olá {{ user|upper }}, unidade de acesso {{unidade|upper}}.</p>
+    <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+      <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Valor Em Aberto</em></strong></h2>
+    </div>  
+  </div><br><br><br><br> 
+  <div class="col-ms-12 col-md-10" style="margin-top: -30px;">
+    <div style="display: flex; font-size: 25px;font-weight: bold;" >
+      <p class="paragrafo"  style="margin-left: 10 px;">Estudante: {{aluno}}</p>
+    </div>
+    <table class="table text-light"> 
+      <thead>
+        <tr>          
+          <th scope="col">Data</th> 
+          <th scope="col">Quantidade</th> 
+          <th scope="col">Produtos consumidos</th>  
+          <th scope="col">Valor unitário</th>                                              
+          <th scope="col">Valor total</th>                     
+        </tr>
+      </thead>        
+      <tbody>
+        {% for debito in pag_obj %}
+        <tr>        
+          <td> {{ debito.data|date:"d-m-Y"}}</td>
+          <td> {{ debito.quantidade}}</td>
+          <td> {{ debito.produto }}</td>
+          <td> {{ debito.valor_unitario}}</td>                     
+          <td> {{ debito.valor_total}}</td>          
+        </tr>   
+      </tbody>                
+        {% endfor %}
+    </table>
+  </div>     
+  <div class=" mx-auto" style="display: flex; font-size: 18px;margin-right: 20px; font-weight: bold;" >
+    <p class="paragrafo"  style="margin-left: 40px;">{{num_pag}}/{{tol_pag}} página(s)</p> 
+    <p class="outro-texto"  style="margin-left: 40px;" >Quantidade de registro: {% if quant_debito|floatformat:"0"|length == 1 %}0{{ quant_debito }}{% else %}{{ quant_debito }}{% endif %}</p>
+    <p class="paragrafo"  style="margin-left: 40px;">Valor total: {{valor_total|floatformat:"2"}}</p>
+  </div > 
+  <div>
+    {% if pag_obj.has_previous %}
+    <a href="?page=1" class="btn btn-primary" role="button"  style="width: 200px; border-radius: 10px; margin-top: 10px;">Primeira</a>
+    <a href="?page={{ pag_obj.previous_page_number }}" class="btn btn-primary" role="button" style="width: 200px; border-radius: 10px; margin-top: 10px;">Anterior</a>
+    {% endif %}
+    {% if pag_obj.has_next %}
+    <a href="?page={{ pag_obj.next_page_number }}" class="btn btn-primary" role="button" style="width: 200px; border-radius: 10px; margin-top: 10px;">Próxima</a>
+    <a href="?page={{ pag_obj.paginator.num_pages }}" class="btn btn-primary" role="button" style="width: 200px; border-radius: 10px; margin-top: 10px;">Última</a>
   </div>
-<div class="col-md-12">  
-<a href="{% url 'cadastro:pesquisa-debito-aluno'%}" class="btn btn-primary" role="button" style="width: 200px">Nova pesquisa</a>
-<a href="{% url 'cadastro:delete-registro-debito'%}?nome={{aluno}}&{{lista_debito}}" class="btn btn-primary" role="button" style="width: 200px">Deletar débito</a>
-<a href="{% url 'cadastro:lista-debito'%}?nome={{aluno}}&{{lista_debito}}" class="btn btn-primary" role="button" style="width: 200px">Ir para débitos</a>
-<a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 200px">Home</a>
-</div>  
+    {% endif %}  
+  <div class="col-ms-4 col-md-10" style="margin-top: 10px;">
+    <a href="{% url 'cadastro:pesquisa-debito-aluno'%}" class="btn btn-primary" role="button" style="width: 200px; border-radius: 10px;">Nova pesquisa</a>
+    <a href="{% url 'cadastro:lista-debito'%}?nome={{aluno}}&{{lista_debito}}" class="btn btn-primary" role="button" style="width: 200px; border-radius: 10px;">Ir para débitos</a>
+    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 200px; border-radius: 10px;">Home</a>
+    <a href="{% url 'cadastro:delete-registro-debito'%}?nome={{aluno}}&{{lista_debito}}" class="btn btn-primary" role="button" style="width: 200px; border-radius: 10px;">Deletar débito</a>
+
+  </div>  
+</div>
 {% else %}
-<p>*Olá {{usuario|upper}}, este acesso é referente a unidade de {{unidade|upper}}</p>
-
-<div class="col-md-6">  
-<h1>Pesquise debito do aluno<br><br></h1>
-
-<form action="" method="post" >            
-  {% csrf_token %}
-  {% bootstrap_form formulario %}
-  
-
-  <button class="btn btn-primary" type="submit" role="button" style="width: 200px">Pesquisar</button>
-  <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button" style="width: 200px">Débitos</a>
-  <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 200px">Home</a>
-
-
-
-</div>  
-</form>
-<div>
+<div class="container">
+  <div class="row justify-content-center align-items-center">
+      <div class="col-ms-4 col-md-4 mx-auto text-center">
+          <p>*Olá {{ user|upper }}, informe o aluno para pequisa.</p>
+          <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+              <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Pesquisar Débito</em></strong></h2>
+          </div>  
+        </div>
+      </div>
+  <div class="col-ms-4 col-md-4 mx-auto" style="margin-top: 30px;">
+    <!-- FORMULÁIO PARA PESQUISA DE DÉBITO -->
+    <form action="" method="post" >            
+      {% csrf_token %}
+      {% bootstrap_form formulario %}
+      <button class="btn btn-primary" type="submit" role="button" style="width: 465px; border-radius: 10px;">Pesquisar</button>
+      <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button"  style="width: 465px; border-radius: 10px; margin-top: 10px;">Débitos</a>
+      <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button"  style="width: 465px; border-radius: 10px; margin-top: 10px;">Home</a>
+    </form>
+  <div>
+</div>
 {% endif %}
 
 {% endblock %}

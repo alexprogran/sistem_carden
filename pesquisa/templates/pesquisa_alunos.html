@@ -1,0 +1,85 @@
+{% extends "carden.html" %}
+{% load bootstrap5 %}
+
+
+<!-- ESTA TEMPLATE ESTA RELACIONADA COM A "PESQUISA DO ALUNO" -->              
+
+{% block conteudo %}
+ 
+<!-- Formulário para pesquisa --> 
+{% if formulario_pesquisa %}
+<div class="container">
+  <div class="row justify-content-center align-items-center">
+      <div class="col-md-4 mx-auto text-center">
+          <p>*Olá {{ user|upper }}, unidade de acesso - {{unidade|upper}}</p>
+          <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+              <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Pesquisar aluno</em></strong></h2>
+          </div>  
+        </div>        
+  </div><br><br><br><br>
+    
+
+    <div class="col-md-4 mx-auto">
+      <!-- Formulário para pesquisa -->
+      <form action="" method="post" >            
+          {% csrf_token %}
+          {% bootstrap_form pesquisa_aluno_form %}         
+
+          <button class="btn btn-primary" type="submit"role="button" style="width: 465px; border-radius: 10px;">Pesquisar</button>
+          <a href="{% url 'cadastro:lista-aluno'%}" class="btn btn-primary" role="button" style="width: 465px; border-radius: 10px; margin-top: 10px;">Cancelar</a>
+
+          
+      </form>
+    </div>
+<!-- Resultado da pesquisa -->
+{% elif resultado %}
+
+
+  <div class="row justify-content-center align-items-center">
+    <div class="col-md-4 mx-auto text-center">
+        <p>*Olá {{ user|upper }}, unidade de acesso - {{unidade|upper}}</p>
+        <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+            <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Resultado da pesquisa</em></strong></h2>
+        </div>  
+      </div>               
+  </div><br><br><br><br>
+  
+<div class="container mt-5">
+  <div class="col-ms-12 col-md-10 mx-auto">
+    <table class="table text-light">
+      <thead>
+        <tr>
+          <th scope="col">Nome</th>
+          <th scope="col">Turma</th>                      
+          <th scope="col">Responsável</th>
+          <th scope="col">Telefone do responsável</th>                     
+                          
+        </tr>
+      </thead>
+        
+      <tbody>
+        {% for aluno in resultado_pesquisa%}
+        <tr>
+            
+          <td> {{aluno.nome}}</td>                   
+          <td> {{aluno.turma}}</td>
+          <td> {{ aluno.responsavel}}</td>
+          <td> {{ aluno.tel_responsavel}}</td>                    
+          
+        </tr>   
+      </tbody>             
+      {% endfor %}
+    </table>
+  </div>
+  
+  <div class="col-md-10 mx-auto">
+    <a href="{% url 'cadastro:lista-aluno'%}" class="btn btn-primary"role="button" style="width: 200px; border-radius: 10px;">Alunos</a>
+    <a href="{% url 'cadastro:pesquisa-alunos'%}" class="btn btn-primary" role="button" style="width: 200px; border-radius: 10px;">Nova pesquisa</a>
+    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 200px; border-radius: 10px;">Home</a>
+  </div>
+</div> 
+
+
+{%endif%}
+{% endblock %}
+

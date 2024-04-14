@@ -1,30 +1,118 @@
 {% extends "carden.html" %}
 {% load bootstrap5 %}
 
+        <!-- A TEMPLATE ESTA RELACIONADA COM O CADASTRO DE VENDAS -->
 {% block conteudo %}
-<div class="col-md-6"> 
-    {% if sucesso %}
-        <p class="alert alert-success">Venda realizada com sucesso</p>
-        <a href="{% url 'cadastro:cadast-vendas'%}" class="btn btn-primary"  role="button" style="width: 200px">Novo Cadastro</a>  
-        <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary"  role="button" style="width: 200px">Vendas</a>  
-    
-   
-    {% else %}
-    <p>Olá {{usuario}}</p>
-    <h1>Cadastros de vendas - {{unidade}}<br><br></h1>
+<div class="container">
+    <div class="row">
 
-    <form action="" method="post" >            
-        {% csrf_token %}
-        {% bootstrap_form vendas_form %}
+        <!-- Caso o usuário não tenha cadastrado produto. -->
+        {% if produto_zerado %}
+        <div class="col-ms-3 col-md-3" style="margin-left: 120px;">
+            <p class="alert alert-warning">
+                *Olá {{usuario|upper}} você não possui produto cadastrado.
+                Para cadastrar produto click em 
+                "Home"->"Cadastramentos"->"Estoque"->"Cadastrar".
+            </p>
+        </div>  
+
+        <div class="col-ms-6 col-md-4"  style="margin-left: 50px;">
+            <div class="list-group text-center" style="background-color: white; color: black; border-radius: 10px;">
+                <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Resgistrar Venda</em></strong></h2>
+            </div><br><br>      
+            
+            <div>
+                <!-- Fomulário para cadastro da venda. -->
+                <form action="" method="post" >            
+                    {% csrf_token %}
+                    {% bootstrap_form vendas_form %}
+                    <button class="btn btn-primary" type="submit" role="button" style="width: 448px; border-radius: 10px;">Confirma</button>
+                    <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" type="submit" role="button" style="width: 448px; border-radius: 10px; margin-top: 10px;">vendas</a>
+                    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" type="submit" role="button" style="width: 448px; border-radius: 10px; margin-top: 10px;">Home</a>
+
+                </form>
+            </div>
+
+            <!-- Rodapé
+            <div class="container">
+                <div class="row justify-content-center align-items-center mt-4">
+                    <div class="col-md-4 text-center" style="font-size: 20px;margin-top: 80px;">  
+                            <p>Sistem Carden</p>
+                    </div>
+                        
+                </div> -->
+            </div>
+        </div>
+
+
+        {% elif sucesso %}
+
+        <div class="row justify-content-center align-items-center mx-auto col-ms-6 col-md-4"style="margin-top: 20px;" >
+            <p class="alert alert-success text-center">Venda realizada com sucesso</p>
+            <div class="mb-2 mx-auto" style="margin-top: 50px;">
+                <a href="{% url 'cadastro:cadast-vendas'%}" class="btn btn-primary " role="button" style="width: 430px; border-radius: 10px;">Novo cadastro</a>
+            </div>
+            <div class="mb-2">
+                <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button" style="width:430px; border-radius: 10px;">Vendas</a>
+            </div>
+            <div class="mb-2">
+                <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary"  role="button" style="width: 430px; border-radius: 10px;">Home</a>
+            </div> 
+            
+            
+           
+           
+            <!-- Rodapé -->
+            <div class="container">
+                <div class="row justify-content-center align-items-center mt-4">
+                    <div class=" col-ms-4 col-md-5 text-center" style="font-size: 20px;margin-top: 80px;">  
+                            <p>Sistem Carden</p>
+                    </div>
+                        
+                </div>
+            </div>
+                
+            
+        </div>
         
-        <br><br>
+        
+        {% else %}         
+            
+            <div class="row justify-content-center align-items-center mx-auto" style="position: relative; top: -30px;">
+                <div class=" col-ms-6 col-md-4 mx-auto text-center">
+                    <p>*Olá {{ user|upper }}, unidade de acesso - {{unidade|upper}}</p>
+                    <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                        <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Registrar Venda</em></strong></h2>
+                    </div>
+                </div>
+            </div><br><br>        
 
-        <button class="btn btn-primary" type="submit" role="button" style="width: 200px">Finalize vendas</button> 
-        <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary"  role="button" style="width: 200px">Cancelar</a>  
-        <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary"  role="button" style="width: 200px">Home cadastro</a>      
-    </form>
+            <div class="col-ms-6 col-md-4 mx-auto" style="position: relative; top: -30px;">
+                <form action="" method="post" >            
+                    {% csrf_token %}
+                    {% bootstrap_form vendas_form %}            
+        
+
+                    <button class="btn btn-primary" type="submit" role="button" style="width: 448px; border-radius: 10px;">Finalizar</button> 
+                    <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary"  role="button" style="width: 448px; border-radius: 10px; margin-top: 10px;">Vendas</a>  
+                    <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary"  role="button" style="width: 448px; border-radius: 10px; margin-top: 10px;">Home</a>      
+                </form>
+            </div>
+
+            <!-- Rodapé -->
+            <div class="container">
+                <div class="row justify-content-center align-items-center mt-4">
+                    <div class=" col-ms-4 col-md-5 text-center" style="font-size: 20px;margin-top: 80px;">  
+                            <p>Sistem Carden</p>
+                    </div>
+                        
+                </div>
+            </div>
+        
+    </div>
+</div>
 
     {% endif %}
 
-</div>
+
 {% endblock %}

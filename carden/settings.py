@@ -135,7 +135,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SEZE': 10,
-    'DATE_INPUT_FOEMATS': ["%d/%m/%Y"],
-    'DATE_FORMAT': '%d/%m/%Y',
+    # 'DATE_INPUT_FOEMATS': ["%d/%m/%Y"],
+    #'DATE_FORMAT': '%d/%m/%Y',
 
 }

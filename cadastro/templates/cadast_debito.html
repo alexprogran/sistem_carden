@@ -1,31 +1,122 @@
-{% extends "carden.html" %}
+{% extends "carden.html" %} 
 {% load bootstrap5 %}
 
+<!-- TEMPLATE RELACIONADA COM O CADASTRO DE DÉBITO -->
+
 {% block conteudo %}
-<div class="col-md-6"> 
+
     {% if sucesso %}
-        <p class="alert alert-success">Débito registrado</p>
-        <a href="{% url 'cadastro:cadast-debito'%}" class="btn btn-primary" type="submit" role="button" style="width: 200px">Novo cadastro</a>        
-        <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary"type="submit" role="button" style="width: 200px">Lista de débito</a> 
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary"type="submit" role="button" style="width: 200px">Home</a>  
+
+    <div class="row justify-content-center align-items-center mx-auto col-ms-6 col-md-4"style="margin-top: 20px;" >
+        <p class="alert alert-success text-center">Registro de débito realizado com sucesso.</p>
+        <div class="mb-2 mx-auto" style="margin-top: 50px;">
+            <a href="{% url 'cadastro:cadast-debito'%}" class="btn btn-primary " role="button" style="width: 430px; border-radius: 10px;">Novo cadastro</a>
+        </div>
+        <div class="mb-2">
+            <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button" style="width:430px; border-radius: 10px;">Débitos</a>
+        </div>
+        <div class="mb-2">
+            <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary"  role="button" style="width: 430px; border-radius: 10px;">Home</a>
+        </div>       
+        <!-- Rodapé -->
+        <div class="container">
+            <div class="row justify-content-center align-items-center mt-4">
+                <div class=" col-ms-4 col-md-5 text-center" style="font-size: 20px;margin-top: 80px;">  
+                        <p>Sistem Carden</p>
+                </div>
+                    
+            </div>
+        </div>
         
+    {% elif sem_cadastro %}
+    <div class="container">
+        <div class="row" >
+            <div class="col-ms-4 col-md-4"  style="margin-left: 50px;">
+                <p class="alert alert-warning mx-auto" style="border-radius: 20px;">
+                    *Olá {{usuario|upper}} para cadastro de débito é necessário 
+                    possuir alunos cadastrados: click em "Home" -> "Cadastramentos" -> "Aluno"        
+                </p>
+            </div>
+        
+            <div class="col-ms-4 col-md-4"  style="margin-left: 30px; margin-top: -40px;">              
+                <p>*Olá {{ user|upper }}, unidade de acesso - {{unidade|upper}}</p>
+                <div class="list-group text-center" style="background-color: white; color: black; border-radius: 10px;">
+                    <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Cadastro De Débito</em></strong></h2>
+                </div>
+                <div>
+                    <form action="" method="post" >            
+                        {% csrf_token %}
+                        {% bootstrap_form formulario_debito %}
+                        <button class="btn btn-primary" type="submit" role="button"  style="width: 448px; border-radius: 10px;">Cadastrar</button>
+                        <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px; margin-top: 10px;">Cancelar</a> 
+                        <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px; margin-top: 10px;">Home</a>  
+                    </form>
+                </div>
+            </div>
+        </div>        
+    </div>
+
+    {% elif produto_zerado or categoria_zerada %}
+    <div class="container">
+        <div class="row">
+            <p class="alert alert-warning">
+                *Olá {{usuario|upper}} seu estoque esta zerado. 
+                Para cadastro de débito é necessário o registro
+                de produto no estoque. Click em "Home" -> "Cadastramentos" -> "Estoque".
+                *Antecedendo esta etapa, é necessário que tenha definido 
+                as categorias dos produto em seu estoque. Para isso click
+                em "Home" -> "Cadastramento" -> "Categoria".
+            </p>
+
+            <div class="row justify-content-center align-items-center" style="margin-top: -70px;">
+                <div class=" col-ms-4 col-md-4  text-center">
+                    <p>*Olá {{ user|upper }}, unidade de acesso {{unidade|upper}}.</p>
+                    <div class="list-group mx-auto" style="background-color: white; color: black; border-radius: 10px;">
+                        <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Cadastre Debito</em></strong></h2>
+                    </div>
+                </div>
+            </div><br><br>
+            <div class=" col-ms-4 col-md-4 mx-auto">
+                <form action="" method="post" >            
+                    {% csrf_token %}
+                    {% bootstrap_form formulario_debito %}
+                    <button class="btn btn-primary" type="submit" role="button" style="width: 448px; border-radius: 10px;">Cadastrar</button>
+                    <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px; margin-top:10px;">Cancelar</a> 
+                    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px; margin-top:10px;">Home</a>  
+                </form>
+            </div>
+        </div>
+    </div>
     
     {% else %}
-    <p>Olá {{usuario}}</p>
-    <h1>Cadastro de débito - {{unidade}}<br><br></h1>
-
-    <form action="" method="post" >            
-        {% csrf_token %}
-        {% bootstrap_form formulario_debito %}
-        
-        
-
-        <button class="btn btn-primary" type="submit" role="button" style="width: 200px">Cadastrar</button>
-        <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button" style="width: 200px">Cancelar</a> 
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 200px">Home</a>  
-    </form>
+    <div class="container">
+        <div class="row justify-content-center align-items-center" style="margin-top: -70px;">
+            <div class="col-ms-4 col-md-4 text-center">
+                <p>*Olá {{ user|upper }}, unidade de acesso {{unidade|upper}}.</p>
+                <div class="list-group mx-auto" style="background-color: white; color: black; border-radius: 10px;">
+                    <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Cadastre Debito</em></strong></h2>
+                </div>
+            </div>
+        </div><br>
+        <div class="col-ms-4 col-md-4 mx-auto">
+            <form action="" method="post">
+                {% csrf_token %}
+                {% bootstrap_form formulario_debito %}
+                <div style="width: 460px; margin-bottom: 10px;">
+                    <button class="btn btn-primary" type="submit" role="button" style="width: 100%; border-radius: 10px;">Cadastrar</button>
+                </div>
+                <div style="width: 460px; margin-bottom: 10px;">
+                    <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button" style="width: 100%; border-radius: 10px;">Cancelar</a>
+                </div>
+                <div style="width: 460px;">
+                    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 100%; border-radius: 10px;">Home</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
 
     {% endif %}
 
-</div>
+
 {% endblock %}

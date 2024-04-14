@@ -1,52 +1,57 @@
 
 import re
 from django import forms
-from flask.typing import ResponseValue
-from .models import  (AlunoModel, DebitoModel, CategoriaProdutoModel,
-DebitoModel, FuncionarioModel, EstoqueModel, TesteEstoqueModel, UnidModel, UsuariosModel)
+# from flask.typing import ResponseValue
+from .models import  ( AlunoModel,DebitoModel, CategoriaProdutoModel,
+DebitoModel, FuncionarioModel, EstoqueModel, ModelAluno, UnidModel)
 
 
+class AlunosForms(forms.ModelForm):
+    """
+    Fomulário para cadastro de aluno.
 
-
-class AlunoForms(forms.ModelForm):
-    
+    """
     class Meta:
         model = AlunoModel
-        fields = ['nome', 'turma', 'responsavel','telefone_responsavel']
+        fields = ['nome','turma','responsavel','telefone_responsavel']
 
+    
     # Resgatando o usuário e a unidade da view
     def __init__(self,*args, **kwargs):
         self.usuario = kwargs.pop('usuario', None)
         self.unidade = kwargs.pop('unidade', None)
-        super(AlunoForms,self).__init__(*args,**kwargs)
+        super().__init__(*args,**kwargs)
 
-    """
-    *PROBLEMA: o implemento das validações abaixo, por algum 
-     motivo  estão invalidando os dados, a view retorna um formulário vazio.
-    a solução foi criar uma  validação "a nível de servidor".
-
-    """ 
-
-    # def clean_nome(self):
-    #     cleaned_data = super().clean()
-    #     nome_aluno = self.cleaned_data['nome'] 
        
-    #     if AlunoModel.objects.filter(usuario=self.usuario,
-    #     unidade=self.unidade, nome=nome_aluno).exists():                        
-    #         raise forms.ValidationError('{} é um nome existente em nossos cadastros'.format(nome_aluno))
-    #     return super().clean()
-       
-    # def clean_telefone_reponsavel(self):
-    #     telefone = self.cleaned_data['telefone']
+            
+    # Validações.
+    def clean(self):
+        cleaned_data = super().clean()
+        telefone = self.cleaned_data['telefone_responsavel']
+        nome = cleaned_data.get('nome')
+
         
-    #     # Utilizando uma expressão regular para verificar se o telefone contém apenas dígitos
-    #     if not re.match(r'^\d{2}-\d+$', telefone):
-    #         raise forms.ValidationError("Apenas dígitos exemplo: 71-99999999.")
+        # Validando campo aluno
+        if  AlunoModel.objects.filter(usuario=self.usuario,
+            unidade=self.unidade,nome=nome).exists():
+            campo = nome                  
+            raise forms.ValidationError(
+            """No campo ,"Nome", aluno já cadastrado."""
+            )
+            
+        # Validando campo telefone
+        elif not re.match(r'^\d{2}-\d+$', telefone): 
 
-    #     return telefone
+            raise forms.ValidationError(
+            """*Telefone inválido, este exemplo "99-999999999"  é a 
+                formatação esperada para o campo telefone.
+            """)
 
 
 class EstoqueFomModel(forms.ModelForm):
+
+    """ Fomulário de cadastro de produto no estoque."""
+    
     class Meta:
         model = EstoqueModel
         fields = ['produto','quantidade','preco_varejo','preco_custo','categoria']
@@ -67,19 +72,6 @@ class EstoqueFomModel(forms.ModelForm):
             to_field_name='categoria',          
             empty_label="Selecione uma categoria")
         
-      
-    
-   
-    
-    
-    # categoria = forms.ModelChoiceField(# O campo categoria "selecionável".
-    #     ini= __init__(),
-    #     queryset=CategoriaProdutoModel.objects.filter(usuario=__init__.self.user, unidade=__init__.self.unid),
-    #     to_field_name='categoria',  
-    #     empty_label="Selecione uma categoria",
-    # )
-
-
     def clean_produto(self):
         produto_form = self.cleaned_data['produto']
         existe_produto = EstoqueModel.objects.filter(
@@ -96,66 +88,96 @@ class EstoqueFomModel(forms.ModelForm):
 
 
 class FuncionarioModelForm(forms.ModelForm):
+    
+    """
+    Formulário para cadastro de funcionáro.
 
+    Raise:
+        forms.Validations.Erros - caso o nome para cadastro do
+        funcionário já exista nos registros ou se o telefone 
+        informado par cadastro não esteja no formato esperado.
+      
+     """    
+    
     class Meta:
         model = FuncionarioModel
         fields = ['funcionario','telefone']
 
+        # Inicializar o formulário com o usuario e unidade .
+    def __init__(self, *args,**kwargs):
+        self.usuario = kwargs.pop('usuario',None)
+        self.unidade = kwargs.pop('unidade',None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        funcionarios = self.cleaned_data['funcionario']
+        telefone = self.cleaned_data['telefone']
+        
+        # Validando campo funcionário.
+        if  FuncionarioModel.objects.filter(usuario=self.usuario,
+            unidade=self.unidade,funcionario=funcionarios).exists():
+                              
+            raise forms.ValidationError(
+            f"""Olá {self.usuario}, {funcionarios} já consta nos registros 
+            de funcionários.
+            """
+            )
+            
+        # Validando campo telefone
+        elif not re.match(r'^\d{2}-\d+$', telefone): 
+
+            raise forms.ValidationError(
+            """*Telefone inválido, este exemplo "99-999999999"  é a 
+                formatação esperada para o campo telefone.
+            """)
+
 
 class CadastroDebitoFormModel(forms.ModelForm):
-    """Formulário de cadastro de débito."""
+    """Formulário para cadastro de valores em aberto."""
     class Meta:
         model = DebitoModel
-        fields = ['produto','quantidade','data']
+        fields = ['aluno','produto','quantidade','data']
 
     # Inicializar o formulário com o usuario e unidade .
     def __init__(self, *args,**kwargs):
         self.usuario = kwargs.pop('usuario',None)
         self.unidade = kwargs.pop('unidade',None)
-        super(CadastroDebitoFormModel,self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
        
         self.fields['produto'] = forms.ModelChoiceField(
             queryset=EstoqueModel.objects.filter(usuario=self.usuario,
             unidade=self.unidade),
             to_field_name='produto',  
             empty_label="Selecione um produto",
-            required=False # este campo é opcional
+            
         )
-        self.fields['aluno'] = forms.ModelChoiceField(
-            queryset=AlunoModel.objects.filter(usuario=self.usuario, 
-            unidade=self.unidade),
-            to_field_name='nome',  
-            empty_label="Selecione um aluno",
-            required=False
-            )     
+              
 
-    def clean_produto(self):
-        produto = self.cleaned_data['produto']
-        registro = EstoqueModel.objects.filter(
-        usuario=self.usuario, unidade=self.unidade).count()
-        if registro<=0: # No caso de não haver produto no estoque.     
-            raise forms.ValidationError(
-            'Comando inválido. Cadastre pelo menos um produto no estoque.'
-        )
-        elif produto == None:# No caso de não haver uma seleção para o campo.
-            raise forms.ValidationError('Campo obrigatório.')             
-        return produto    
-     
 
-    def clean_aluno(self):
-        aluno = self.cleaned_data['aluno']
-        registro = AlunoModel.objects.filter(
-            usuario=self.usuario, unidade=self.unidade).count()
-        if registro<=0: # No caso de não haver alunos registrados  no banco de dados.
-            raise forms.ValidationError(
-            'Sem registro no cadastro de aluno. Cadastre pelo menos um aluno.'
-        )
-        elif aluno == None: # No caso de não haver um selação para o campo.
-            raise forms.ValidationError('Campo obrigatório.')             
-        return aluno
+    def clean(self):
+        cleaned_data = super().clean()
+        nome_aluno = self.cleaned_data.get('aluno')
+        data = self.cleaned_data.get('data')
 
+        # Validando aluno
+        if not ModelAluno.objects.filter(nome=nome_aluno,
+        usuario=self.usuario, unidade=self.unidade).exists():
+            raise forms.ValidationError('Aluno não encontrado em nosso registros')
+        
+        elif self.cleaned_data['produto'] == None:
+            raise forms.ValidationError('Selecione um produto para o cadastro.')
+                   
+        # Validando data
+        # elif not re.match(r'^\d{2}/\d{2}/\d{4}$',str(data)):
+        #     raise forms.ValidationError(
+        #     """*Data inválida, siga o exemplo para o formato esperado:
+        #     12/12/0000
+        #     """)
+ 
 
 class CadastroVendaFormModel(forms.ModelForm):
+    """ Fomulário para cadastro de vendas."""
    
     class Meta:
         model = DebitoModel
@@ -173,64 +195,97 @@ class CadastroVendaFormModel(forms.ModelForm):
             to_field_name='produto',  
             empty_label="Selecione um produto",
         )
-                
-         
-    # def clean_produto(self):
-    #     produto_form = self.cleaned_data['produto']
-    #     quant_form = self.cleaned_data['quantidade']
-    #     instance = EstoqueModel.objects.get(produto=produto_form)
-        
-    #     if produto_form == None: #Caso o estoque não tenha produtos cadastrados.
-    #          raise forms.ValidationError('Comando inválido. Cadastre pelo menos um produto no estoque.') 
-        
-    #     elif quant_form > instance.quantidade :# Caso a quantidade de venda supere a quantidade no estoque.        
-        
-    #         raise forms.ValidationError(f'A quantidade no estoque de {produto_form} é {instance.quantidade}.')
-    #     return produto_form
 
 
 class CategoriaProdutoFormModel(forms.ModelForm):
+
+    """ 
+    O formúlario para cadastro de  produto.
+
+    Raise:
+        forms.Validations.Error - se a categoria informada para
+        cadastro constar nos registros. 
+    
+    """
+
     class Meta:
         model = CategoriaProdutoModel
         fields = ['categoria']
 
-    # def clean_categoria(self):
-    #     campo_categoria = self.cleaned_data['categoria']
-    #     if CategoriaProdutoModel.objects.filter(
-    #         categoria=campo_categoria,).exists():
-    #         raise forms.ValidationError('Categoria existente.')           
-      
-    #     return campo_categoria   
 
 
-class FormTesteEstoque(forms.ModelForm):
-    class Meta:
-        model = TesteEstoqueModel
-        fields = ['produto','quantidade','valor']
+    def __init__(self,*args,**kwargs):
+        self.usuario = kwargs.pop('usuario')
+        self.unidade = kwargs.pop('unidade')
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        campo_categoria = self.cleaned_data['categoria']
+        cleaned_data = super().clean()
+
+        if CategoriaProdutoModel.objects.filter(usuario=self.usuario,
+        unidade=self.unidade,categoria=campo_categoria,).exists():
+
+            raise forms.ValidationError(f"""
+            Olá {self.usuario}, a categoria {campo_categoria} já foi 
+            cadastrada, informe uma outra categoria para registro.
+            
+            """
+            )           
 
 
 class UnidModelForm(forms.Form):
+    """
+    Este fomulário para unidade.
+    
+    Raise:
+        *forms.ValidationError: se o usuário não tiver cadastrado unidade
+         para acesso ou se a unidade informada não for encontrada
+         no banco de dados.
+    
+    """
 
     unidade = forms.CharField(label='Unidade',max_length=25)
 
-
-
     def __init__(self, *args, **kwargs):
         # Recupera o usuário da sessão ao inicializar o formulário
-        usuario_logado = kwargs.pop('usuario_logado', None)
-        super(UnidModelForm, self).__init__(*args, **kwargs)
+        self.usuario = kwargs.pop('usuario', None)
         
-        # # Adiciona o campo ao formulário com base no usuário da sessão
-        # if usuario_logado:
-        #     self.fields['unidade'] = forms.ModelChoiceField(
-        #         queryset=UnidModel.objects.filter(usuario=usuario_logado),
-        #         to_field_name='usuario',
-        #         empty_label="Selecione uma unidade",
-        #     )
+        super().__init__(*args, **kwargs)
+        
+    def clean(self):
+        unid = self.cleaned_data['unidade']
+        cleaned_data = super().clean()
+        # Verificando se existe registros de unidade.
+        quant_register_unid = UnidModel.objects.filter(usuario=self.usuario,
+        ).count()        
+
+        # Não existindo registro de unidade.
+        if quant_register_unid == 0:
+            raise forms.ValidationError( 
+            f'''Olá {self.usuario}, você ainda não criou um unidade. 
+            Faça clicando no batão abaixo "Criar unidade". '''
+            )
+        # Se a unidade não for encontrada
+        elif not UnidModel.objects.filter(usuario=self.usuario,unidade=unid).exists():
+            raise forms.ValidationError(f'''Olá {self.usuario}, você não 
+                    cadastrou {unid} como uma de suas unidades.''')
     
 
 
-class CreateUnidModelForm(forms.Form):   
+class CreateUnidModelForm(forms.Form):
+
+    """ 
+    O formulário para cadastro de usuário.
+    
+    Raise: 
+        forms.Validation.error - Se a unidade informada para 
+        cadastro existir.
+    
+    """  
+
+
+
     unidade = forms.CharField(label='Unidade',max_length=25)
 
     def __init__(self, *args, **kwargs):
@@ -238,12 +293,13 @@ class CreateUnidModelForm(forms.Form):
         self.usuario = kwargs.pop('usuario', None)
         super(CreateUnidModelForm, self).__init__(*args, **kwargs)
 
-    def clean_unidade(self):
+    def clean(self):
       # Checa a unidade à ser criada evitando duplicações de unidade para usuário.   
-        unidade = self.cleaned_data['unidade']       
-        if UnidModel.objects.filter(usuario=self.usuario, unidade=unidade).exists():
-            raise forms.ValidationError(f'''Nome inválida,{unidade}, 
-            unidade já existente em nossos registros.''')
-        return unidade
+        unidade = self.cleaned_data['unidade']  
+             
+        if  UnidModel.objects.filter(usuario=self.usuario, unidade=unidade).exists():
+            raise forms.ValidationError(f'''Unidade inválida, {unidade} 
+            é uma unidade já existente para esse usuário.''')
+        
    
 

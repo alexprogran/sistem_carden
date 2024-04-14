@@ -3,33 +3,38 @@
 
 
 {% block conteudo%}
-<p>Olá {{usuario}}</p>
-<h1>Opções de pesquisa - {{unidade}}<br><br></h1>
-</style>
-   
-    <div class="col-md-12"> 
-        <div class="row">
-            <div class="col-md-3"> 
-                    <a href="{% url 'cadastro:pesquisa-aluno'%}" class="btn btn-primary" role="button" style="width: 300px">Alunos</a><br><br>
-                    <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary"  role="button" style="width: 300px">Home</a><br><br>
-       
-                </div> 
-                    
-                <div class="col-md-3 text-right">
-                    <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary" role="button" style="width: 300px">Venda</a><br><br>
-
-                </div>
-               
-                <div class="col-md-3 text-right">
-                    <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary"  role="button" style="width: 300px">Débitos</a><br><br>
-
-                    <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary"  role="button" style="width: 300px">Estoque</a><br><br>
-                </div>
-    
-            </div>        
+<div class="container mt-4"  >
+    <div class="row justify-content-center align-items-center mt-4">
+        <div class="col-md-4 mx-auto text-center">
+            <p>*Olá {{ user|upper }}, unidade de acesso - {{unidade|upper}}</p>
+            <div class="list-group" style="background-color: white; color: black; border-radius: 20px;">
+                <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Pesquisa</em></strong></h2>
+            </div>
         </div>
-    </div>            
+    </div><br><br>
+   
+        <div class="col-md-4 mx-auto mt-4 text-center">
+             
+                <a href="{% url 'cadastro:lista-aluno'%}" class="btn btn-primary mb-3" role="button" style="width:  100%; border-radius: 20px;">Aluno</a><br>
+                <a href="{% url 'cadastro:lista-vendas'%}" class="btn btn-primary mb-3" role="button" style="width:  100%; border-radius: 20px;">Venda</a><br>
+                <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary mb-3" role="button" style="width:  100%; border-radius: 20px;">Débito</a><br>
+                <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary mb-3" role="button" style="width:  100%; border-radius: 20px;">Estoque</a><br>
+        </div><br><br><br>
     
+</div>
+
+
+<div class="row justify-content-center align-items-center mt-4">
+    <div class="col-md-4 mx-auto text-center">
+        <p>Sistem Carden</p>
+    </div>
+</div>
+
+
+
+
+    
+   
 
    
     

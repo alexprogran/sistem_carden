@@ -1,36 +1,50 @@
 {% extends "carden.html" %}
 {% load bootstrap5 %}
 
+    <!-- ESTA TEMPLATE ESTA RELACIONADA COM A CRIAÇÃO DO USUÁRIO. -->
 {% block conteudo %}
-<div class="col-md-6"> 
+
+
+    <!-- usuario criado com sucesso -->
     {% if sucesso %}
+
+    <div class="col-md-6"> 
         <p class="alert alert-success">Unidade cadastrada com sucesso</p>
 
         <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Acessar unidade</a>
+    </div>
 
-           
-    
-    {% elif unid_invalid %}
-    <p class="alert alert-danger" style="background-color: red; color: white;">{{unidade}}, UNIDADE JÁ CADASTRADA!</p>
-    <a href="{% url 'cadastro:cadast-unid'%}" class="btn btn-primary">Cadastrar uma nova unidade</a>
-        <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary">Acessar unidade</a>
-
-    
     {% else %}
-    <p>Usuário: {{usuario}}</p>
-    <h1>Registre uma unidade</h1><br><br></h1>
+    
+    <div class="container">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-md-4 mx-auto text-center">
 
-    <form action="" method="post" >            
-        {% csrf_token %}
-        {% bootstrap_form unid_form %}    
+                <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                    <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Cadastre unidade</em></strong></h2>
+                </div>
+            </div>
         
+        </div><br><br><br><br>
 
-        <button class="btn btn-primary" type="submit">Enviar</button>
-        <a href="{% url 'cadastro:lista-estoque'%}" class="btn btn-primary">Cancelar</a>
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>  
-    </form>
-   
+
+        <div class="row justify-content-center">
+        
+            <div class="col-md-4">    
+                <!-- formulário para criação da unidade. -->
+                <form action="" method="post" >            
+                    {% csrf_token %}
+                    {% bootstrap_form unid_form %}    
+                    
+
+                    <button class="btn btn-primary" type="submit" role="button" style="width: 448px; border-radius: 10px;">Registrar</button><br><br>
+                    <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px;">Cancelar</a>
+                
+                </form>
+            </div>
+        </div>
+    </div>    
     {% endif %}
 
-</div>
+
 {% endblock %}

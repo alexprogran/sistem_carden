@@ -1,24 +1,31 @@
 {% extends "carden.html" %}
 {% load bootstrap5 %}
 
+<!-- Este formulário esta relacionado com autenticação do usuário. -->
+
 {% block conteudo %}
-<div class="col-md-6">   
+<div class="container">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-4 mx-auto text-center">           
+            <div class="list-group" style="background-color: white; color: black; border-radius: 10px;">
+                <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Login</em></strong></h2>
+            </div>  
+          </div>        
+    </div><br><br><br><br>  
 
-    <h1><br><br>Realize o login</h1>
-    
 
-
-    <form action="" method="post" >            
-        {% csrf_token %}
-        {% bootstrap_form form_login %}
+<div class="row justify-content-center">
+    <div class="col-md-4" style="font-family: 'Open Sans', sans-serif;"> 
+        <!-- <h3>Login</h3><br><br> -->
+        <form action="" method="post">            
+            {% csrf_token %}
+            {% bootstrap_form form_login %}
+            <button class="btn btn-primary" type="submit" role="button" style="width: 150px">Confirma</button>       
+            <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 150px">Home</a><br><br>  
         
-        
-
-        <button class="btn btn-primary" type="submit">Confirma</button>       
-        <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary">Home</a>  
-    </form>
-   
-    
-
+            <a href="{% url 'cadastro:cadast-user'%}">Inscreva-se</a></p>
+        </form>
+    </div>
 </div>
 {% endblock %}
+
