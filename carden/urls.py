@@ -16,9 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from django.shortcuts import redirect
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path('carden/', lambda request: redirect('cadastro:login'), name='home'),
     path('carden/', include('cadastro.url', namespace='cadastro')),
     path('api/',include('api.url',namespace='api'))
    ]  

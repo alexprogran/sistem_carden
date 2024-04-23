@@ -420,14 +420,14 @@ class CadastrosVendaModel(models.Model):
             produt_edit: produto final para a correção,
             quant_inicio: quantidade do produto incializado para correção,
             quant_final: quantidade fornecida para correção,
-            date: data do registro
+            date: data do registro           
 
-            Kwargs:
+            unic: True -  indica que irá ter apenas um produto a ser corrigido
 
-                unic: True -  indica que irá ter apenas um produto a ser corrigido
+            delete: True - indica que a quantidade do produto na correção            
+            irá zerá e que o mesmo deverá ser deleteado
 
-                delete: True - indica que a quantidade do produto na correção
-                irá zerá e que o mesmo deverá ser deleteado
+            update: True - irá ocorrer atualização do produto e seus valores.
 
         """  
 
@@ -720,14 +720,11 @@ class CadastrosVendaModel(models.Model):
                 if dif_quant <= 0 :
 
                     # Atualizando o banco de dados de registro de vendas.      
-                    # atualizar_vendas = CadastrosVendaModel().acres(usuario=user,unidade=unid,
-                    # pro_corrig=produt_corrigir, pro_edit=produt_edit,quant_inicio=quantidade_inicial,
-                    # qut_form=quantidade_form, date=data, delete=True
-                    # )  
-
                     atualizar_vendas = CadastrosVendaModel().acres(usuario=user,unidade=unid,
-                    pro_corrig=produt_corrigir, pro_edit=produt_edit, date=data, update=True
+                    pro_corrig=produt_corrigir, pro_edit=produt_edit,quant_inicio=quantidade_inicial,
+                    qut_form=quantidade_form, date=data, delete=True
                     )  
+
                     
                     # Atualizando o banco de dados do estoque: 
                     atualizar = EstoqueModel().corrig_db_estoque( usuario=user,unidade=unid, 

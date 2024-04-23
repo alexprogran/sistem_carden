@@ -13,12 +13,6 @@ from django.contrib.auth.decorators import login_required
 def update(request):
     return render(request,'update.html')
 
-
-
-
-
-
-
 @login_required
 def view_update_estoque(request):
     
