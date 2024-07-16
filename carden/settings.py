@@ -39,14 +39,12 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'bootstrap5',
     'rest_framework',
+    'rest_framework_simplejwt',
     'api',
     "cadastro",
     "pesquisa",
     "upadate",
-    "deleta",
-
-    
-
+    "deleta", 
 ]
 
 MIDDLEWARE = [
@@ -134,8 +132,18 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SEZE': 10,
-    # 'DATE_INPUT_FOEMATS': ["%d/%m/%Y"],
-    #'DATE_FORMAT': '%d/%m/%Y',
+    'PAGE_SIZE': 5,
+    'DATE_INPUT_FORMATS': ["%d/%m/%Y"],
+    'DATE_FORMAT': '%d/%m,%Y',
+    # 'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_AUTHENTICATION_CLASSES':[
+        'rest_framework.authentication.BasicAuthentication',
+        #  'rest_framework.authentication.TokenAuthentication',
+        #  'rest_framework.authentication.SessionAuthentication',
+        ],
+    
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
 
 }

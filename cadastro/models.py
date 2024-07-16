@@ -1,8 +1,8 @@
+import io
 from django.core.cache import cache
 import random
 import datetime
-
-
+from django.http import HttpResponse
 from django import forms
 from django.db import models
 from django.core.validators import RegexValidator
@@ -10,6 +10,15 @@ from django.db.models import Max
 from decimal import Decimal
 from django.db.models import Sum
 import numpy as np
+import os
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+
+from reportlab.platypus import Paragraph
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.units import inch
 
 
 class AlunoModel(models.Model):
@@ -288,7 +297,7 @@ class EstoqueModel(models.Model):
     def __str__(self):
         return self.produto
 
-
+ 
 class DebitoModel(models.Model):
     usuario =  models.CharField(verbose_name='Usuário', max_length=25,blank=True,null=True)
     unidade =  models.CharField(verbose_name='Unidade', max_length=25,blank=True,null=True)
@@ -298,8 +307,142 @@ class DebitoModel(models.Model):
     quantidade =  models.DecimalField(verbose_name='Quantidade',max_digits=10,decimal_places=0)
     valor_total =  models.DecimalField(verbose_name='Total',max_digits=10,decimal_places=2,null=True,blank=True)    
     data = models.DateField(verbose_name='Data')
-    criado_em = models.DateTimeField(verbose_name='Criado em', auto_now_add=True)
+    criado_em = models.DateTimeField(verbose_name='Criado em',auto_now_add=True)
+    status = models.CharField(verbose_name='Stuatus',max_length=25,default='pendente')
     
+    def gera_pdf_(self,user, unid, aluno):        
+        # Realize o queryset
+        query = DebitoModel.objects.filter(usuario=user, unidade=unid, aluno=aluno,status='pendente')
+
+        # Crie um buffer de bytes para armazenar o PDF
+        buffer = io.BytesIO()
+
+        # Crie um documento PDF
+        pdf = SimpleDocTemplate(buffer, pagesize=letter)
+        elements = []
+
+        # Adicione os dados do queryset como texto formatado ao PDF
+        data_text = []
+        for objeto in query:
+            data_text.append(
+                            f"{objeto.data}"
+                            f" {objeto.produto}"
+                            f"Valor unitário {objeto.valor_unitario}"
+                            f"Quantidade: {objeto.quantidade}"
+                            f"Valor total: {objeto.valor_total}\n"
+                            
+                            )
+
+        # Junte todas as linhas em uma única string
+        data_text = ''.join(data_text)
+
+        # Adicione um parágrafo ao PDF com os dados formatados
+        style = ParagraphStyle(
+            name='Normal',
+            fontName='Helvetica',
+            fontSize=12,
+            spaceBefore=0.5 * inch,  # Espaço na borda superior (por exemplo, 0.5 polegadas)
+            alignment=1,  # Alinhamento central
+        )
+        p = Paragraph(data_text, style)
+        elements.append(p)
+
+        # Construa o PDF
+        pdf.build(elements)
+
+        # Retorne o PDF como resposta HTTP
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="resultado_queryset.pdf"'
+        response.write(buffer.getvalue())
+        buffer.close()
+        return response
+
+
+    def gera_pdf(self,user, unid, aluno):        
+
+        # Realize o queryset
+        
+        query = DebitoModel.objects.filter(usuario=user, unidade=unid, aluno=aluno,status='pendente')
+
+        # Crie um buffer de bytes para armazenar o PDF
+        buffer = io.BytesIO()
+
+        # Crie um documento PDF
+        # pdf = SimpleDocTemplate(buffer, pagesize=letter)
+        # elements = []
+
+        # Ajuste as margens do documento PDF
+        pdf = SimpleDocTemplate(buffer, pagesize=letter,
+            rightMargin=20, leftMargin=20,
+            topMargin=20, bottomMargin=20)  # Margens menores para expandir o conteúdo
+        elements = []
+
+        # Cabeçalhos da tabela
+        headers = ["Data", "Produto", "Valor unitario", "Quantidade",  "Total", ]
+
+        # Adicione os cabeçalhos à lista de dados
+        data = [headers]
+        total = 0
+        # Adicione os dados do queryset à tabela no PDF
+        for objeto in query:
+            if objeto.data:
+                objeto.data = datetime.datetime.strftime(objeto.data,'%d/ %m/%Y')
+            elif objeto.valor_total:
+                objeto.valor_total = int(objeto.valor_total)
+            total = total + int(objeto.valor_total)   
+            data.append([objeto.data, objeto.produto, objeto.valor_unitario,
+            objeto.quantidade, objeto.valor_total])
+
+        table = Table(data)       
+
+        # Estilize a tabela
+        style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.white),  # Fundo branco para o cabeçalho
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),  # Cor do texto do cabeçalho
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),  # Alinhamento central para o cabeçalho
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Fonte em negrito para o cabeçalho
+        ('FONTSIZE', (0, 0), (-1, -1), 12),  # Tamanho da fonte para toda a tabela
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # Espaçamento inferior do cabeçalho
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),  # Fundo branco para as linhas de dados
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),  # Cor do texto para as linhas de dados
+        ('ALIGN', (0, 1), (-1, -1), 'CENTER'),  # Alinhamento central para as linhas de dados
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),  # Fonte normal para os dados
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),  # Espaçamento à esquerda para todas as células
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),  # Espaçamento à direita para todas as células
+        ('TOPPADDING', (0, 0), (-1, -1), 10),  # Espaçamento superior para todas as células
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),  # Espaçamento inferior para todas as células
+    ])               
+
+        table.setStyle(style)
+        elements.append(table)
+
+        # Estilize o parágrafo
+        paragraph_style = ParagraphStyle(
+            name='Normal',
+            fontName='Helvetica',
+            fontSize=12,
+            spaceBefore=0.5 * inch,  # Espaço na borda superior (por exemplo, 0.5 polegadas)
+            alignment=1,  # Alinhamento central
+        )
+        
+
+        # Adicione um parágrafo ao PDF        
+        p = Paragraph("Total dos lanches de {}: {},00".format(aluno,total), paragraph_style)
+        l_inf  = Paragraph('========================================================================================')
+
+        elements.append(p)  
+        elements.append(l_inf)      
+
+        # Construa o PDF
+        pdf.build(elements)
+
+        # Retorne o PDF como resposta HTTP
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="consumo_cantina.pdf"'
+        response.write(buffer.getvalue())
+        buffer.close()
+        return response
+
     
     def atualiza_db_debito(self,unid,user,produto_form,data_form,quantidade_form,aluno_form):
        
@@ -312,7 +455,7 @@ class DebitoModel(models.Model):
 
         if existe_registro:
             registro_debito = DebitoModel.objects.get(usuario=user, unidade=unid, 
-            aluno=aluno_form, data=data_form, produto=produto_form)
+            aluno=aluno_form, data=data_form, produto=produto_form,status='pendente')
             nova_quantidade = registro_debito.quantidade + quantidade_form 
             novo_valor_total = registro_debito.valor_total + (quantidade_form*registro_debito.valor_unitario)
             atualizar = DebitoModel.objects.filter(usuario=user, unidade=unid,
@@ -341,7 +484,7 @@ class DebitoModel(models.Model):
         a chave "sucesso" possui valor boleano.
          """
         
-        cadastro_venda = DebitoModel(
+        cadastro_debito = DebitoModel(
             usuario=user,
             unidade=unid,       
             aluno=aluno_form,
@@ -350,17 +493,25 @@ class DebitoModel(models.Model):
             data=data_form,
             valor_unitario = valor_unitario_form,
             valor_total=valor_unitario_form * quantidade_form,
-         
-
         )
+        
+        
         # Condição para somente alterar a quantidade e o valor total
         if DebitoModel.objects.filter(unidade=unid,usuario=user, aluno=aluno_form,
-            produto=produto_form, data=data_form).exists():  
+            produto=produto_form, data=data_form,status='pendente').exists():
             quary_set = DebitoModel()
-            atualiza = quary_set.atualiza_db_debito(unid, user, produto_form,data_form,quantidade_form,aluno_form) # Atualizando(quantidade e valor total)
+            atualiza = quary_set.atualiza_db_debito(
+                unid,
+                user, 
+                produto_form,
+                data_form,quantidade_form,
+                aluno_form
+            )        
         else: # Realizando um  registro completo do produto na tabela.
-            cadastro_venda.save()
-        quary_set = DebitoModel()
+            
+            cadastro_debito.save()
+        # quary_set = DebitoModel()
+
         contexto = {
             'sucesso':True,
         }  
@@ -368,7 +519,7 @@ class DebitoModel(models.Model):
 
 
     
-        print(media_lucro)
+      
     
     
     def __str__(self):
@@ -376,22 +527,29 @@ class DebitoModel(models.Model):
 
 
 class HistoricoDebitoModel(models.Model):
+ 
+    # arquivo = models.FileField()
     usuario = models.CharField(verbose_name='Usuáiro',max_length=25,null=True, blank=True)
     unidade = models.CharField(verbose_name='Unidade',max_length=25, null=True, blank=True)     
     aluno =  models.CharField(verbose_name='Aluno', max_length=25)
     produto =  models.CharField(verbose_name='Produto', max_length=25)
     valor = models.DecimalField(verbose_name='Valor',max_digits=5,decimal_places=3)
     data = models.DateField(verbose_name='Data')
-    
+        
+   
+
+
     def __str__(self):
         return self.aluno
 
 
 class FuncionarioModel(models.Model):
+    
     usuario = models.CharField(verbose_name='Usuáiro',max_length=25,null=True, blank=True)
     unidade = models.CharField(verbose_name='Unidade',max_length=25, null=True, blank=True) 
     funcionario = models.CharField(verbose_name='Funcionário',max_length=25)
     telefone = models.CharField(verbose_name='Telefone', max_length=25)
+    criado_por = models.ForeignKey('auth.User', models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.funcionario

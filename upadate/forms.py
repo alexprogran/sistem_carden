@@ -403,4 +403,60 @@ class UpdateCadastroAluno(forms.ModelForm):
         if self.instance:
             self.fields['clone_fild_name'].initial = self.instance.nome
     
+
+class UpdatePesquisaDebito(forms.ModelForm):
+
+    # Fomulário para pesquisa de débito do aluno
+
+    data = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+
+    class Meta:
+        model = DebitoModel
+        fields = ['aluno','produto','data']
+
    
+    def __init__(self, *args, **kwargs):
+        
+        self.usuario = kwargs.pop('usuario')
+        self.unidade = kwargs.pop('unidade')
+        super().__init__(*args, **kwargs)
+        self.fields['produto'] = forms.ModelChoiceField(
+            queryset=EstoqueModel.objects.filter(usuario=self.usuario, unidade=self.unidade).order_by('produto'),
+            to_field_name='produto',
+            empty_label='Seleciono um produto',
+        )
+
+    
+
+
+
+class UpdateDebito(forms.ModelForm):
+    
+    # Fomulário populado com os dados da instância.
+    clone_fild_name = forms.CharField(label='Aluno',max_length=25)
+    aluno = forms.CharField(widget=forms.HiddenInput())
+
+
+    data = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    
+    class Meta:
+        model = DebitoModel
+        fields = ['clone_fild_name','aluno','produto','valor_unitario','quantidade','data']
+
+    def __init__(self,*args, **kwargs):
+        self.usuario = kwargs.pop('usuario')
+        self.unidade = kwargs.pop('unidade')
+        super().__init__(*args,**kwargs)
+        
+        # self.fields['produto']= forms.ModelChoiceField(
+        #         label='*Selecione um produto',           
+        #         queryset=EstoqueModel.objects.filter(usuario=self.usuario, unidade=self.unidade,
+        #         ).order_by('produto') , 
+        #         to_field_name='produto',
+        #         empty_label='Selecione produto',                       
+        #     )
+
+        if self.instance:
+            self.fields['clone_fild_name'].initial = self.instance.aluno
+            # self.fields['data'].initial = self.instance.data
+    

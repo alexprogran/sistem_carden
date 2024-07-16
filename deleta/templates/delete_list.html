@@ -21,7 +21,7 @@
         </thead>
         
         <tbody>
-          {% for debito in infor_debito %}
+          {% for debito in infor %}
           <tr>
 
             <!-- <th scope="row">{{ debito.aluno__nome }}</th> -->
@@ -36,12 +36,12 @@
           {% endfor %}
 
       </table>
-    </div>
-    <div class="col-md-12 mx-auto">  
-      <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px; margin-top: 10px">Débitos</a>
-      <a href="{% url 'cadastro:pesquisa'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px;margin-top: 10px">Home</a>
-    </div>       
-  </div>
+      <div class="mx-auto">    
+        <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px; margin-top: 10px">Débitos</a>
+        <a href="{% url 'cadastro:pesquisa'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px;margin-top: 10px">Home</a>
+      </div>
+    </div>   
+  </div>      
   {% endif %}
 
 

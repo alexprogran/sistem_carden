@@ -32,11 +32,11 @@ class AlunosForms(forms.ModelForm):
 
         
         # Validando campo aluno
-        if  AlunoModel.objects.filter(usuario=self.usuario,
+        if  ModelAluno.objects.filter(usuario=self.usuario,
             unidade=self.unidade,nome=nome).exists():
             campo = nome                  
             raise forms.ValidationError(
-            """No campo ,"Nome", aluno já cadastrado."""
+            f"""{nome} já consta em nossos cadastos."""
             )
             
         # Validando campo telefone
@@ -134,10 +134,16 @@ class FuncionarioModelForm(forms.ModelForm):
 
 
 class CadastroDebitoFormModel(forms.ModelForm):
+
     """Formulário para cadastro de valores em aberto."""
+
+    data = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))     
+
     class Meta:
         model = DebitoModel
         fields = ['aluno','produto','quantidade','data']
+
+        
 
     # Inicializar o formulário com o usuario e unidade .
     def __init__(self, *args,**kwargs):
@@ -147,26 +153,32 @@ class CadastroDebitoFormModel(forms.ModelForm):
        
         self.fields['produto'] = forms.ModelChoiceField(
             queryset=EstoqueModel.objects.filter(usuario=self.usuario,
-            unidade=self.unidade),
+            unidade=self.unidade).order_by('produto'),
             to_field_name='produto',  
-            empty_label="Selecione um produto",
-            
+            empty_label="Selecione um produto",            
         )
-              
+
+        self.fields['aluno'] = forms.ModelChoiceField(
+            queryset=ModelAluno.objects.filter(usuario=self.usuario,
+            unidade=self.unidade).order_by('nome'),
+            to_field_name='nome',
+            empty_label="Selecione um cliente",
+
+        )
 
 
-    def clean(self):
-        cleaned_data = super().clean()
-        nome_aluno = self.cleaned_data.get('aluno')
-        data = self.cleaned_data.get('data')
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     nome_aluno = self.cleaned_data.get('aluno')
+    #     data = self.cleaned_data.get('data')
 
-        # Validando aluno
-        if not ModelAluno.objects.filter(nome=nome_aluno,
-        usuario=self.usuario, unidade=self.unidade).exists():
-            raise forms.ValidationError('Aluno não encontrado em nosso registros')
+    #     # Validando aluno
+    #     if not ModelAluno.objects.filter(nome=nome_aluno,
+    #     usuario=self.usuario, unidade=self.unidade).exists():
+    #         raise forms.ValidationError('Aluno não encontrado em nosso registros')
         
-        elif self.cleaned_data['produto'] == None:
-            raise forms.ValidationError('Selecione um produto para o cadastro.')
+    #     elif self.cleaned_data['produto'] == None:
+    #         raise forms.ValidationError('Selecione um produto para o cadastro.')
                    
         # Validando data
         # elif not re.match(r'^\d{2}/\d{2}/\d{4}$',str(data)):

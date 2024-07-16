@@ -16,7 +16,7 @@
     
     <form action ="" method="post" >            
       {% csrf_token %}
-      {% bootstrap_form update_aluno_form %}     
+      {% bootstrap_form update_aluno_form %}      
   
       <button class="btn btn-primary" type="submit">Atualizar</button>
       <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary">Retornar</a>    

@@ -5,17 +5,18 @@ view_cadastro, view_cadastro_aluno, view_cadastro_debito, view_cadastro_funciona
 view_cadastro_estoque, view_cadastro_usuario, view_cadastro_vendas, view_categoria_produto, view_home_carden, view_unid)
 from deleta.views import delete_lista_debito, view_delete_aluno, view_delete_produto
 from pesquisa.views import ( view_lista_aluno, result_deb_aluno,
- view_listar_estoque, view_pesquisa, view_pesquisa_aluno,
+ view_listar_estoque, view_pdf, view_pesquisa, view_pesquisa_aluno,
  view_pesquisa_debito_aluno, view_lista_debito,view_lista_vendas,
    view_pesquisa_venda_data, view_pesquisa_venda_entre_data,result_vendas)
 
 from upadate.views import  (update, 
- view_update_aluno,view_update_estoque, view_update_vendas)
+ view_update_aluno,view_update_estoque, view_update_vendas, view_update_debito)
 
 app_name = "cadastro"
 
+
 urlpatterns = [
-    
+    path('pdf/',view_pdf, name='pdf'),
     path('home-carden/',view_home_carden, name='home-carden'),
     path('login/',view_login, name='login'), 
     path('unidade/',view_unid, name='unidade'),
@@ -36,6 +37,7 @@ urlpatterns = [
     path('update-aluno/', view_update_aluno, name='update-aluno'),
     path('update-estoque/',view_update_estoque, name='update-estoque'),
     path('update-vendas/', view_update_vendas, name='update-vendas'),
+    path('update-debito/',view_update_debito,name='update-debito'),
   
 
     path('lista-aluno/',view_lista_aluno, name='lista-aluno'),

@@ -1,16 +1,81 @@
 import json
-from django.http import HttpResponse
+from django.http import HttpResponse,HttpRequest
+from rest_framework.request import Request
+
+from rest_framework.viewsets import ViewSet, ModelViewSet
+
 from django.shortcuts import render
-from cadastro.models import AlunoModel, CategoriaProdutoModel
+from cadastro.models import AlunoModel, CategoriaProdutoModel, DebitoModel, FuncionarioModel
 from rest_framework.decorators import api_view,action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from rest_framework import viewsets
-from api.serializer import AlunoModelSerializer, CategoriaProdutoSerializer, CategoriaProdutoModelSerializer
+from api.serializer import (AlunoModelSerializer, CategoriaProdutoSerializer,
+ CategoriaProdutoModelSerializer, DebAlunoModelSerializer, DebitoSerializer,
+FuniconarioModelSeiralzer)
 
+
+from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
+
+@api_view(http_method_names=['GET', 'POST'])
+def sum_deb(request):
+    # Inicializando variáveis
+    dados = []
+    data = []
+   
+    # Obtendo todos os débitos e agrupando por data
+    debitos = DebitoModel.objects.all()
+    current_date = None
+    valor_total = 0
+
+    for deb in debitos:  
+
+        if len(dados)> 0:
+            if deb.data in data:
+                    dat = deb.data.strftime("%d/%m/%Y")
+                    print('Chave:',dados[dat])
+
+        # 
+           
+            # list_data = [list(data.values())[0] for data in dados]
+            # list_data = [data for data in dados]
+            # print('list_date:',list_data)           
+            # for dat in dados:
+            #     data_lista = dict(dat)
+            #     print('Data do banco de dados',deb.data)
+            #     print('Data da lista cosntruida:', list(data_lista.keys()))           
+                
+            #     if str(deb.data) == str(list(dat.keys())[0]):
+            #         print('Igual')
+                
+       
+
+        if deb.data != current_date:
+
+            if current_date is not None:
+                # Adiciona o total da data anterior à lista de dados
+                dados.append({'data': current_date, 'valor_total': valor_total})
+                data.append(deb.data) #--> compondo a lista de datas               
+                
+            # Atualiza a data atual e reinicializa o valor total
+            current_date = deb.data
+            valor_total = deb.valor_total # --> atualização do valor_total
+        else:
+            # Soma o valor ao total acumulado para a data atual
+            valor_total += deb.valor_total
+
+    # Adiciona o último total acumulado à lista de dados
+    if current_date is not None:
+        dados.append({'data': current_date, 'valor_total': valor_total})  
+    print(len(dados))
+    
+    # Retornando os dados acumulados por data em uma resposta JSON
+    return Response(dados)
+
+            
 # sem utilizar o rest-framework
-def view_api_testes_(request):
-
+# def view_api_testes_(request):
+def lista_categoria_(request):
     instence_estoque = CategoriaProdutoModel.objects.all()
     dados = []
     for categoria in instence_estoque:
@@ -23,12 +88,15 @@ def view_api_testes_(request):
 
 # com a utilização da rest-framework
 @api_view()
-def lita_categoria_(request):
+def lista_categoria_(request):
 
     instence_estoque = CategoriaProdutoModel.objects.all()
     dados = []
     for categoria in instence_estoque:
-        dado = {'categoria':categoria.categoria}
+        dado = {'categoria':categoria.categoria,
+                'unidade': categoria.unidade,
+                'usuario': categoria.usuario,
+                }
         dados.append(dado)
     
     return Response(dados)
@@ -37,6 +105,7 @@ def lita_categoria_(request):
 # com a utilização da rest-framework
 @api_view(http_method_names= ['POST'])
 def criar_categoria_(request):
+
     categoria  = request.data['categoria']
     create = CategoriaProdutoModel.objects.create(categoria=categoria)        
     dados = []
@@ -46,29 +115,38 @@ def criar_categoria_(request):
     return Response(dados)
 
 
+
+
+
+
 # com a utilização da rest-framework com o "serializer.Serializer"
 @api_view(http_method_names= ['POST'])
 def criar_categoria(request):
-    serializer = CategoriaProdutoSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    categoria = serializer.validated_data['categoria']
-    create = CategoriaProdutoModel.objects.create(categoria=categoria)        
-    dados = []
-    dado = {'categoria':create.categoria}
-    dados.append(dado)
+    # serializer = CategoriaProdutoSerializer(data=request.data)
+    serializer = CategoriaProdutoModelSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True):
+
+        categoria = serializer.validated_data['categoria']
+        user = serializer.validated_data['usuario']
+        unid = serializer.validated_data['unidade']
+        create = CategoriaProdutoModel.objects.create(categoria=categoria,usuario=user,unidade=unid)        
+        dados = []
+        dado = {'categoria':create.categoria,'unidade': create.unidade, 'usuario': create.usuario}
+        dados.append(dado)
+        
+        return Response(dados)
     
-    return Response(dados)
 
 # usando o "serializer.ModelSerializer"
-@api_view()
-def lita_categoria(request):
+@api_view(http_method_names=['GET','POST'])
+def lista_categoria(request):
 
     db_categoria = CategoriaProdutoModel.objects.all()
     serializer = CategoriaProdutoModelSerializer(instance=db_categoria, many=True)
     
     return Response(serializer.data)
 
-
+@api_view()
 class AlunoViewSet(ViewSet):
     serializer_class = AlunoModelSerializer
     
@@ -144,34 +222,59 @@ class AlunoViewSet(ViewSet):
         serializer.is_valid(raise_exception=True)
         db_aluno.delete()
         return Response({'sucesso':'O registro foi deletado com sucesso'})
+    
+
+
+    
        
-class AlunoModelViewSet(viewsets.ModelViewSet):
+class AlunoModelViewSet(ModelViewSet):
     serializer_class = AlunoModelSerializer
     queryset = AlunoModel.objects.all()
     
 
     
 
-class CategoriaProdutoViewSet(ViewSet):
+# class CategoriaProdutoViewSet(ViewSet):
 
-    serializer_class = CategoriaProdutoSerializer
+#     serializer_class = CategoriaProdutoSerializer
 
-    def list(self,request):
-        db_categoria = CategoriaProdutoModel.objects.all()
-        serializer = CategoriaProdutoSerializer(instance=db_categoria, many=True)
-        return Response(serializer.data)
+#     def list(self,request):
+#         db_categoria = CategoriaProdutoModel.objects.all()
+#         serializer = CategoriaProdutoSerializer(instance=db_categoria, many=True)
+#         return Response(serializer.data)
     
 
-    def create(self, request):
-        db_categoria = CategoriaProdutoModel.objects.all()
-        serializer = CategoriaProdutoSerializer(instance=db_categoria, many=True)
-        serializer.is_valid(raise_exception=True)
-        categoria = serializer.validated_data['categoria']
-        create = CategoriaProdutoModel.objects.create(categoria=categoria)
-        dado = {'categoria': create.categoria}
-        return Response(dado)
+#     def create(self, request):
+       
+#         serializer = CategoriaProdutoSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         categoria = serializer.validated_data['categoria']
+#         user = serializer.validated_data['usuario']
+#         unid = serializer.validated_data['unidade']
+#         create = CategoriaProdutoModel.objects.create(categoria=categoria, unidade=unid, usuario=user)
+       
+#         return Response(serializer.data)
 
+class CategoriaProdutoModelViewSet(ModelViewSet):
+    serializer_class = CategoriaProdutoModelSerializer
+    # queryset = CategoriaProdutoModel.objects.all()
+
+    def get_queryset(self):
+        return super().get_queryset()
+
+    # def get_queryset(self):
+    #     return CategoriaProdutoModel.objects.all()
     
+    def perform_create(self, serializer):
+        # Se o usuário estiver autenticado o objeto criado terá uma referência ao usário que o cirou.
+        if self.request.user.is_authenticated:
+            serializer.save(user=self.request.user)
+        else:
+            serializer.seva()
+
+
+# class CategoriaProdutoViewSet(ViewSet):  
+     
     def update(self, request, pk=None):
 
         # Obtenha o objeto existente pelo ID (pk)        
@@ -198,3 +301,60 @@ class CategoriaProdutoViewSet(ViewSet):
     #     serializer.save()
     
     
+
+class DebitoVeiwSet(ViewSet):
+        
+        
+        def list(self, request):
+
+            dados = []
+            # Obtendo todos os débitos e agrupando por data
+            debitos = DebitoModel.objects.all()
+            current_date = None
+            valor_total = 0
+
+            for deb in debitos:
+                if deb.data != current_date:
+                    if current_date is not None:
+                        # Adiciona o total da data anterior à lista de dados
+                        dados.append({'data': current_date, 'valor_total': valor_total})
+                    
+                    # Atualiza a data atual e reinicializa o valor total
+                    current_date = deb.data
+                    valor_total = deb.valor_total
+                else:
+                    # Soma o valor ao total acumulado para a data atual
+                    valor_total += deb.valor_total
+
+            # Adiciona o último total acumulado à lista de dados
+            if current_date is not None:
+                dados.append({'data': current_date, 'valor_total': valor_total})
+
+            serializer = DebitoSerializer(dados, many=True)
+            return Response(serializer.data)
+
+
+
+class DebAlunoModoViewSet(ModelViewSet):
+    serializer_class = DebAlunoModelSerializer
+    queryset = DebitoModel.objects.all()
+
+
+class FuncionarioModelVeiwSet(ModelViewSet):
+    # personalizar url--> path("api-uath/",include('rest_framework.urls'))
+        # importar a classe IsAuthenticated
+        # implementar a classe na view
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = FuniconarioModelSeiralzer
+    # queryset = FuncionarioModel.objects.all()
+
+    def get_queryset(self):
+        return FuncionarioModel.objects.all()
+    
+    def perform_create(self, serializer):
+
+        if self.request.user.is_authenticated:
+            serializer.save(criado_por=self.request.user) #--> usuário logado.
+        else:
+            serializer.save()

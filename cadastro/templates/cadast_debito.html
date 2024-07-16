@@ -15,6 +15,11 @@
         <div class="mb-2">
             <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button" style="width:430px; border-radius: 10px;">Débitos</a>
         </div>
+
+        <div class="mb-2">
+            <a href="{% url 'cadastro:pesquisa-debito-aluno'%}" class="btn btn-primary" role="button" style="width:430px; border-radius: 10px;">Pesquisar Débito</a>
+        </div>
+
         <div class="mb-2">
             <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary"  role="button" style="width: 430px; border-radius: 10px;">Home</a>
         </div>       
@@ -48,7 +53,7 @@
                         {% csrf_token %}
                         {% bootstrap_form formulario_debito %}
                         <button class="btn btn-primary" type="submit" role="button"  style="width: 448px; border-radius: 10px;">Cadastrar</button>
-                        <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px; margin-top: 10px;">Cancelar</a> 
+                        <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px; margin-top: 10px;">Cancelar</a>
                         <a href="{% url 'cadastro:cadastro'%}" class="btn btn-primary" role="button" style="width: 448px; border-radius: 10px; margin-top: 10px;">Home</a>  
                     </form>
                 </div>
@@ -97,14 +102,22 @@
                     <h2 style="font-family: 'Oswald', sans-serif;"><strong><em>Cadastre Debito</em></strong></h2>
                 </div>
             </div>
-        </div><br>
-        <div class="col-ms-4 col-md-4 mx-auto">
+        </div>
+    </div><br>
+    <div class="container">       
+        <div class="col-ms-4 col-md-4  mx-auto">
             <form action="" method="post">
                 {% csrf_token %}
                 {% bootstrap_form formulario_debito %}
+            
                 <div style="width: 460px; margin-bottom: 10px;">
                     <button class="btn btn-primary" type="submit" role="button" style="width: 100%; border-radius: 10px;">Cadastrar</button>
                 </div>
+                    
+                <div style="width: 460px; margin-bottom: 10px;">
+                    <a href="{% url 'cadastro:pesquisa-debito-aluno'%}" class="btn btn-primary" role="button" style="width: 100%; border-radius: 10px; margin-top: 10px;">Pesquisar Débito</a> 
+                </div>
+
                 <div style="width: 460px; margin-bottom: 10px;">
                     <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary" role="button" style="width: 100%; border-radius: 10px;">Cancelar</a>
                 </div>
@@ -112,6 +125,7 @@
                     <a href="{% url 'cadastro:home-carden'%}" class="btn btn-primary" role="button" style="width: 100%; border-radius: 10px;">Home</a>
                 </div>
             </form>
+        </div>
         </div>
     </div>
     

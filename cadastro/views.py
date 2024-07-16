@@ -20,6 +20,17 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 
+from django.http import HttpResponse
+from django.views.generic import View
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from .models import DebitoModel  # Importe seu modelo aqui
+
+
+    
+
+
 def view_login(request):
     """
     A view checa e autentica o usuário para a utilização
@@ -348,6 +359,7 @@ def view_cadastro_debito(request):
     # Caso não tenha cadastro de produtos na base de dados de estoque .
     elif EstoqueModel.objects.filter(usuario=user, unidade=unid).count() <= 0:
        contexto['produto_zerado'] =True
+
     # Caso não tenha registro de categoria na base de dados de categoria.   
     elif CategoriaProdutoModel.objects.filter(usuario=user, unidade=unid).count() <= 0:
         contexto['categoria_zerada'] = True
@@ -357,7 +369,6 @@ def view_cadastro_debito(request):
         
 
         if formulario_debito.is_valid():
-            
             # Entrandas:
             aluno_form =  formulario_debito.cleaned_data['aluno']
             produto_form = formulario_debito.cleaned_data['produto']
@@ -371,20 +382,20 @@ def view_cadastro_debito(request):
             
             tabela_debito = DebitoModel() 
             # Registrando os débitos no modelo DebitoModel.           
-            gerenciador = tabela_debito.gerentec(unid, user, aluno_form, produto_form,
+            protol_criate = tabela_debito.gerentec(unid, user, aluno_form, produto_form,
             quantidade_form, data_form, valor_unitario[0])
             soma_total = DebitoModel.objects.aggregate(soma=Sum('valor_total'))['soma']
             
             # Criando um histórico do registro.
-            historico_debito_model = HistoricoDebitoModel(
-                usuario=user,
-                unidade=unid,
-                aluno=formulario_debito.cleaned_data['aluno'],
-                produto=formulario_debito.cleaned_data['produto'],  
-                valor=tabela_estoque.preco_varejo,            
-                data=data_form         
-               )         
-            historico_debito_model.save()
+            # historico_debito_model = HistoricoDebitoModel(
+            #     usuario=user,
+            #     unidade=unid,
+            #     aluno=formulario_debito.cleaned_data['aluno'],
+            #     produto=formulario_debito.cleaned_data['produto'], 
+            #     valor=tabela_estoque.preco_varejo,            
+            #     data=data_form         
+            #    )         
+            # historico_debito_model.save()
             contexto = {            
                 'sucesso':True,
                 'soma_total':soma_total
