@@ -392,20 +392,11 @@ def view_update_debito(request):
         if form_pesquisa.is_valid() :
             open_aluno = form_pesquisa.cleaned_data['aluno']
             open_data = form_pesquisa.cleaned_data['data']
-            open_produt = form_pesquisa.cleaned_data['produto'] 
-            
-            print('Primeiro')
-            print('Aluno:',open_aluno, 'Data:', open_data, 'Produto:', open_produt)
-
-            
+            open_produt = form_pesquisa.cleaned_data['produto']      
 
             # Instanciando aluno.
             instance_debito = DebitoModel.objects.get(aluno=open_aluno,data=open_data,produto=open_produt )
-            print('instance_debito:', instance_debito)
-            print('usario e unidade:', user, unid)
-
             
-
             form_preenchido = UpdateDebito(instance=instance_debito,usuario=user, unidade=unid)              
             contexto = {'usuario': user, 'unidade': unid,       
             'form_preenchido': form_preenchido ,'instanciado': True}
@@ -414,7 +405,6 @@ def view_update_debito(request):
                 
             if request.POST.get('type_form') == 'form_preenchido':                
                 
-                print('Instance_debito:',instance_debito)
                 
                 form_preechido = UpdateDebito(request.POST,
                 instance=instance_debito,usuario=user, unidade=unid)
@@ -436,13 +426,10 @@ def view_update_debito(request):
 
                     contexto = {
                                 'sucesso': True,        
-                                }                         
-                    print('Segundo')
+                                }              
 
     
         else:
-            print('Formulário não validado')
-            print('Erros do formulário:', form_preenchido.errors)
 
             contexto = {'usuario': user,
                         'unidade': unid ,
