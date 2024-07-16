@@ -7,17 +7,11 @@ from cadastro.models import (AlunoModel, CadastrosVendaModel,
 from pesquisa.forms import PesquisaAlunoForm
 from .forms import (FormUpadateDebitoModelProduto, FormUpdateDebitoModelAluno, 
 FormUpdateEstoque, FormUpdateEstoquePorProduto, UpadatePesquisaRegistroAluno, UpdateAlunoFormPesquisa,
-UpdateAlunoForms, UpdateCadastroAluno, UpdateVendasForm, UpdateVendasForm, UpdateVendasformPesquisa)
+UpdateAlunoForms, UpdateCadastroAluno, UpdateDebito, UpdatePesquisaDebito, UpdateVendasForm, UpdateVendasForm, UpdateVendasformPesquisa)
 from django.contrib.auth.decorators import login_required
 
 def update(request):
     return render(request,'update.html')
-
-
-
-
-
-
 
 @login_required
 def view_update_estoque(request):
@@ -258,4 +252,204 @@ def view_update_aluno(request):
 
 
 
+@login_required
+def view_update_debito_(request):
 
+    """
+    A view realizar alterações nos dados de cadastro   
+     de debitos:
+
+        * exibe o formulário para pequisa do débito à ser atualizado,
+
+        * retorna o formulário populado com os dados do registro   
+        
+        * e salva as alterações feitas no banco de dados.
+
+    *É necessário que o usuário esteja autenticado para acessar esta view
+    e indique uma unidade correlacionada.
+    
+    """
+    # Resgatando usuário e uniade 
+    user = request.session['usuario_logado']
+    unid = request.session['unidade'] 
+    
+     #Formulário de pesquisa
+    form_pesquisa = UpdatePesquisaDebito(request.POST or None,usuario=user, unidade=unid)
+    contexto = {
+        'usuario': user,
+        'unidade': unid,
+        'pesquisa': True,
+        'form_pesquisa': form_pesquisa,
+        } 
+    
+    if request.method == 'POST':
+         # veriguar porque este trecho resgurada 
+        # os dados do post pois retirando o mesmo os dados do POST não são resguardados.
+
+        if form_pesquisa.is_valid() :
+            open_aluno = form_pesquisa.cleaned_data['aluno']
+            open_data = form_pesquisa.cleaned_data['data']
+            open_produt = form_pesquisa.cleaned_data['produto'] 
+            
+            print('Primeiro')
+            print('Aluno:',open_aluno, 'Data:', open_data, 'Produto:', open_produt)
+
+            
+
+            # Instanciando aluno.
+            instance_debito = DebitoModel.objects.get(aluno=open_aluno,data=open_data,produto=open_produt )
+            print('instance_debito:', instance_debito)
+            print('usario e unidade:', user, unid)
+
+            
+
+            form_preenchido = UpdateDebito(instance=instance_debito,usuario=user, unidade=unid)              
+            contexto = {'usuario': user, 'unidade': unid,       
+            'form_preenchido': form_preenchido ,'instanciado': True}
+
+            # # Se o form_preenchido for subemetido
+                
+            if request.POST.get('type_form') == 'form_preenchido':                
+                
+                print('Instance_debito:',instance_debito)
+                
+                form_preechido = UpdateDebito(request.POST,
+                instance=instance_debito,usuario=user, unidade=unid)
+
+                if form_preechido.is_valid():
+                    
+                
+                    clone_fild_name = form_preechido.cleaned_data['clone_fild_name']
+                    prod = form_preechido.cleaned_data['produto']
+                    v_unit = form_preechido.cleaned_data['valor_unitario']  
+                    quant = form_preechido.cleaned_data['quantidade']  
+                    val_t = v_unit * quant
+                    dat = form_pesquisa.cleaned_data['data']
+
+                    # Realizando a atualização.
+                    atualizando_aluno = DebitoModel.objects.filter(aluno=open_aluno,data=open_data,produto=open_produt ).update(
+                    aluno=clone_fild_name, produto=prod, valor_unitario=v_unit,
+                    quantidade=quant, valor_total=val_t,data=dat)    
+
+                    contexto = {
+                                'sucesso': True,        
+                                }                         
+                    print('Segundo')
+
+    
+        else:
+            print('Formulário não validado')
+            print('Erros do formulário:', form_preenchido.errors)
+
+            contexto = {'usuario': user,
+                        'unidade': unid ,
+                        'form_pesquisa':form_pesquisa ,
+                        'pesquisa': True,
+                        'instance_debito': instance_debito 
+                        }  
+
+                                 
+    return render(request,'update_debito.html', contexto)
+
+
+
+
+
+@login_required
+def view_update_debito(request):
+
+    """
+    A view realizar alterações nos dados de cadastro   
+     de debitos:
+
+        * exibe o formulário para pequisa do débito à ser atualizado,
+
+        * retorna o formulário populado com os dados do registro   
+        
+        * e salva as alterações feitas no banco de dados.
+
+    *É necessário que o usuário esteja autenticado para acessar esta view
+    e indique uma unidade correlacionada.
+    
+    """
+    # Resgatando usuário e uniade 
+    user = request.session['usuario_logado']
+    unid = request.session['unidade'] 
+    
+     #Formulário de pesquisa
+    form_pesquisa = UpdatePesquisaDebito(request.POST or None,usuario=user, unidade=unid)
+    contexto = {
+        'usuario': user,
+        'unidade': unid,
+        'pesquisa': True,
+        'form_pesquisa': form_pesquisa,
+        } 
+    
+    if request.method == 'POST':
+         # veriguar porque este trecho resgurada 
+        # os dados do post pois retirando o mesmo os dados do POST não são resguardados.
+
+        if form_pesquisa.is_valid() :
+            open_aluno = form_pesquisa.cleaned_data['aluno']
+            open_data = form_pesquisa.cleaned_data['data']
+            open_produt = form_pesquisa.cleaned_data['produto'] 
+            
+            print('Primeiro')
+            print('Aluno:',open_aluno, 'Data:', open_data, 'Produto:', open_produt)
+
+            
+
+            # Instanciando aluno.
+            instance_debito = DebitoModel.objects.get(aluno=open_aluno,data=open_data,produto=open_produt )
+            print('instance_debito:', instance_debito)
+            print('usario e unidade:', user, unid)
+
+            
+
+            form_preenchido = UpdateDebito(instance=instance_debito,usuario=user, unidade=unid)              
+            contexto = {'usuario': user, 'unidade': unid,       
+            'form_preenchido': form_preenchido ,'instanciado': True}
+
+            # # Se o form_preenchido for subemetido
+                
+            if request.POST.get('type_form') == 'form_preenchido':                
+                
+                print('Instance_debito:',instance_debito)
+                
+                form_preechido = UpdateDebito(request.POST,
+                instance=instance_debito,usuario=user, unidade=unid)
+
+                if form_preechido.is_valid():
+                    
+                
+                    clone_fild_name = form_preechido.cleaned_data['clone_fild_name']
+                    prod = form_preechido.cleaned_data['produto']
+                    v_unit = form_preechido.cleaned_data['valor_unitario']  
+                    quant = form_preechido.cleaned_data['quantidade']  
+                    val_t = v_unit * quant
+                    dat = form_pesquisa.cleaned_data['data']
+
+                    # Realizando a atualização.
+                    atualizando_aluno = DebitoModel.objects.filter(aluno=open_aluno,data=open_data,produto=open_produt ).update(
+                    aluno=clone_fild_name, produto=prod, valor_unitario=v_unit,
+                    quantidade=quant, valor_total=val_t,data=dat)    
+
+                    contexto = {
+                                'sucesso': True,        
+                                }                         
+                    print('Segundo')
+
+    
+        else:
+            print('Formulário não validado')
+            print('Erros do formulário:', form_preenchido.errors)
+
+            contexto = {'usuario': user,
+                        'unidade': unid ,
+                        'form_pesquisa':form_pesquisa ,
+                        'pesquisa': True,
+                        'instance_debito': instance_debito 
+                        }  
+
+                                 
+    return render(request,'update_debito.html', contexto)

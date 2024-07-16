@@ -1,0 +1,31 @@
+{% extends "carden.html" %}
+{% load bootstrap5 %}
+
+{% block conteudo %}
+
+
+<div class="col-md-12"> 
+  
+    {% if sucesso %}
+    
+    <p class="alert alert-success">Atualização realizada com sucesso, o nome {{ nome_a_aturalizar }} foi alterado para {{nome_atualizado}}.</p>
+    <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary">Retornar</a>
+    {% else %}
+    
+    <p>*Digite o código referente ao registro que pretende alterar.</p>
+    
+    <form action ="" method="post" >            
+      {% csrf_token %}
+      {% bootstrap_form update_aluno_form %}      
+  
+      <button class="btn btn-primary" type="submit">Atualizar</button>
+      <a href="{% url 'cadastro:lista-debito'%}" class="btn btn-primary">Retornar</a>    
+      
+    </form>
+
+    {% endif %}
+
+
+
+  </div> 
+{% endblock %}

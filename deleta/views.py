@@ -1,10 +1,11 @@
 
+from django.http import FileResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from cadastro.models import  DebitoModel, EstoqueModel, ModelAluno
 from .forms import DeleteAlunoModelForm, DeleteProdutoEstoque, PesquisaAlunoFormDelete, PesquisaEstoqueFormDelete
-
-
+from django.db.models import Min, Max
+from pesquisa.views import view_pdf
 
 @login_required
 def view_delete_produto(request): 
@@ -122,34 +123,101 @@ def view_delete_aluno(request):
 
 
 
+def g_pdf(user,unid,estudante):
+    pdf = DebitoModel().gera_pdf(user,unid,estudante)
+    pdf_file = open(pdf, 'rb')
+    return FileResponse(pdf_file, as_attachment=True, filename='lanches.pdf')
 
 
 def delete_lista_debito(request):
     """
-    A view esta relacionada com a visualização da lista de débito
-    excluida do aluno.
-
+    Esta view muda o status de débito "pendente" em "pago" e retorna a lista 
+    com o novo status.
     """
 
     user = request.session['usuario_logado']
     unid = request.session['unidade']
+    session_aluno = request.session['aluno'] 
 
-    nome_aluno = request.GET.get('nome')   
-    lista_debito = request.GET.get('lista_debito')
-  
-   
-    infor_debito =  DebitoModel.objects.filter(usuario=user,
-    unidade=unid,aluno=nome_aluno).values('aluno','produto',
+
+    infor =  DebitoModel.objects.filter(
+        usuario=user,
+        unidade=unid, 
+        aluno=session_aluno, 
+        status='pendente'
+        )  
+    
+    infor_debito =  infor.values('aluno','produto',
     'data','quantidade','valor_unitario','valor_total')
-      
+
+    # cópia de segurança
+    # pdf = view_pdf(request) 
+    pdf = DebitoModel().gera_pdf(user,unid,session_aluno)
+    # pdf = g_pdf(user, unid, session_aluno)
+    
+    if infor:
+        lista_delit = infor
+           
+   
+    data_updata = infor_debito.update(status='pago')        
+    
     contexto = {
         'sucesso':True,
-        'aluno':nome_aluno,
-        'infor_debito':infor_debito       
-    }
-    
-    if infor_debito:
-        infor_debito =  DebitoModel.objects.filter(aluno=nome_aluno)
-        infor_debito.delete()
+        'aluno':session_aluno,
+        'infor': lista_delit,
+     }
    
-    return render(request,'delete_list.html',contexto)
+   
+    # return render(request,'delete_list.html',contexto)
+    return pdf
+    
+
+
+
+
+
+def delete_lista_debito_(request):
+    """
+    Esta view muda o status de débito "pendente" para "pago" e retorna a lista 
+    com o novo status.
+    """
+    try:
+        user = request.session['usuario_logado']
+        unid = request.session['unidade']
+        session_aluno = request.session['aluno']
+    except KeyError:
+        # Redireciona ou trata o caso onde a sessão não contém os dados esperados
+        return render(request, 'error.html', {'message': 'Sessão inválida. Por favor, faça login novamente.'})
+
+    infor = DebitoModel.objects.filter(
+        usuario=user,
+        unidade=unid, 
+        aluno=session_aluno, 
+        status='pendente'
+    )
+
+    # Atualiza o status para "pago"
+    infor.update(status='pago')
+
+    # Gera PDF
+    pdf_path = DebitoModel().gera_pdf(user, unid, session_aluno)
+
+    # Obtem os dados atualizados
+    infor_debito = infor.values('aluno', 'produto', 'data', 'quantidade', 'valor_unitario', 'valor_total')
+
+    contexto = {
+        'sucesso': True,
+        'aluno': session_aluno,
+        'infor': infor_debito,
+    }
+
+    # Renderiza a página HTML com os dados atualizados
+    response = render(request, 'delete_list.html', contexto)
+
+    # Adiciona o PDF ao response
+    pdf_file = open(pdf_path, 'rb')
+    response.content = pdf_file.read()
+    response['Content-Type'] = 'application/pdf'
+    response['Content-Disposition'] = 'attachment; filename="debito.pdf"'
+
+    return response

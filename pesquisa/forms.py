@@ -34,7 +34,7 @@ class PesquisaDebitoAlunoForm(forms.Form):
             em nossos cadastros.""".format(nome_form))
         
         # Checando se o aluno possui débito.   
-        elif not DebitoModel.objects.filter(aluno=nome_form).exists():
+        elif not DebitoModel.objects.filter(aluno=nome_form, status='pendente').exists():
                 
             raise forms.ValidationError("Não foi encontrado débito para {}".format(nome_form))
       

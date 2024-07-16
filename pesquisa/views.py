@@ -27,7 +27,7 @@ def view_lista_debito(request):
     unid = request.session['unidade']
 
     list_deb = DebitoModel.objects.filter(usuario=user,
-    unidade=unid).order_by('aluno')
+    unidade=unid,status='pendente').order_by('aluno')
     total_debito = list_deb.aggregate(Sum('valor_total'))['valor_total__sum']    
     quant_debito =list_deb.count()    
     lista_debito = list_deb.order_by('aluno').values('aluno','produto','valor_unitario','quantidade','valor_total','data')
@@ -78,6 +78,8 @@ def view_pesquisa_debito_aluno(request):
 
         estudante = formulario.cleaned_data['nome']
 
+        request.session['aluno'] = estudante
+
         url = reverse('cadastro:result-deb-aluno',kwargs={'estudante': estudante})
         return redirect(url)      
       
@@ -95,25 +97,23 @@ def result_deb_aluno(request,estudante):
       # Indentificando usuário e unidade
     user = request.session['usuario_logado']
     unid = request.session['unidade']
-
+     
     
     list_deb = DebitoModel.objects.filter(usuario= user, unidade=unid,
-    aluno=estudante)
+    aluno=estudante, status='pendente').order_by('data').values(
+    'aluno','produto','valor_unitario','quantidade','valor_total','data'
+        )
     valor_total =list_deb.aggregate(Sum('valor_total'))['valor_total__sum']
     quant_debito = list_deb.count()
 
-    list_deb = DebitoModel.objects.filter(usuario=user, unidade=unid,
-    aluno=estudante).order_by('data').values(
-    'aluno','produto','valor_unitario','quantidade','valor_total','data'
-        )
+    
     paginator = Paginator(list_deb, 5)
     num_pag = request.GET.get('page')
     pag_obj = paginator.get_page(num_pag)        
     tol_pag = paginator.num_pages
     if num_pag == None:
-        print('num_pa',num_pag)
-        num_pag = 1
-   
+        num_pag = 1  
+
     contexto = {
             'usuario': user,
             'unidade': unid,
@@ -123,14 +123,19 @@ def result_deb_aluno(request,estudante):
             'quant_debito': quant_debito,
             'pag_obj': pag_obj,
             'num_pag': num_pag,
-            'tol_pag': tol_pag,           
-
-        }
+            'tol_pag': tol_pag,      
+        }       
     
     return render(request, 'pesquisa_debito_aluno.html', contexto)
-    
 
+def view_pdf(request):
+    user = request.session['usuario_logado']
+    unid = request.session['unidade']
+    aluno = request.session['aluno']
 
+    pdf = DebitoModel().gera_pdf(user,unid,aluno)
+    # url = reverse('cadastro:lista-debito')
+    return pdf
 
 @login_required
 def view_pesquisa(request):
@@ -233,7 +238,6 @@ def result_vendas(request, dat_pesq):
 
 
 
-
 @login_required
 def view_pesquisa_venda_entre_data(request):
     """ 
@@ -318,37 +322,7 @@ def view_lista_vendas(request):
     }
     return render(request,'lista_vendas.html',contexto)
 
-def view_listar_estoque_(request):
-    # Resgatando usuário e unidade.
-    user = request.session['usuario_logado']
-    unid = request.session['unidade']
 
-    lista_estoque = EstoqueModel.objects.filter(usuario=user,unidade=unid).values(
-    'produto','codigo','quantidade','preco_custo','total_custo','preco_varejo',
-    'total_varejo','categoria')#lista de dicionário cotendo os campos e seus valores
-    
-    quant_produtos = EstoqueModel.objects.filter(usuario=user,
-    unidade=unid).values('produto').count() #contamos a quantidade de produtos.
-    #contém as chaves que guadam os valores dos resultantes da agregação.
-    totais = EstoqueModel().sum_col(user, unid)
-
-    percent_total, lucro_total = EstoqueModel().percent_lucro(user,unid)
-
-    contexto = {
-        'usuario': user,
-        'unid': unid,
-        'itens_total':totais['itens_totais'],
-        'total_custo':totais['custos_totais'],
-        'total_varejo':totais['varejo_total'],
-        'percentual_lucro_total': percent_total,
-        'total_lucro_liquido': lucro_total,
-        'quantidade_produto':quant_produtos,      
-        'lista_estoque':lista_estoque,
-    }
-    
-    
-    
-    return render(request,'lista_estoque.html',contexto)
 
 @login_required
 def view_lista_aluno(request):
