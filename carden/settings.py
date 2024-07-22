@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'bootstrap5',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework.authtoken',
     'api',
     "cadastro",
     "pesquisa",
@@ -137,13 +138,13 @@ REST_FRAMEWORK = {
     'DATE_FORMAT': '%d/%m,%Y',
     # 'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_AUTHENTICATION_CLASSES':[
-        'rest_framework.authentication.BasicAuthentication',
-        #  'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
         #  'rest_framework.authentication.SessionAuthentication',
         ],
     
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ]
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ]
 
 }

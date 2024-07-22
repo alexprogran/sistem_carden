@@ -6,7 +6,7 @@ from rest_framework.viewsets import ViewSet, ModelViewSet
 
 from django.shortcuts import render
 from cadastro.models import AlunoModel, CategoriaProdutoModel, DebitoModel, FuncionarioModel
-from rest_framework.decorators import api_view,action
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from api.serializer import (AlunoModelSerializer, CategoriaProdutoSerializer,
@@ -335,6 +335,7 @@ class DebitoVeiwSet(ViewSet):
 
 
 
+
 class DebAlunoModoViewSet(ModelViewSet):
     serializer_class = DebAlunoModelSerializer
     queryset = DebitoModel.objects.all()
@@ -358,3 +359,5 @@ class FuncionarioModelVeiwSet(ModelViewSet):
             serializer.save(criado_por=self.request.user) #--> usuário logado.
         else:
             serializer.save()
+
+# Espaço reservado
